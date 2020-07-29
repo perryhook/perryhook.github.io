@@ -1,40 +1,64 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+</head>
 <script src = 'https://d3js.org/d3.v5.min.js'></script>
-<style> circle {fill: lightblue; stroke: black;} </style>
+<style> 
+circle {fill: lightblue; stroke: black;}
+
+.line {
+    fill: none;
+    stroke: #ffab00;
+    stroke-width: 3;
+}
+</style>
 <body onload='init()'>
-<svg width=300 height=300></svg>
+<svg width=950 height=500></svg>
 <script>
 async function init() {
-  const data = await d3.csv("https://flunky.github.io/cars2017.csv");
-  var width = 200;
-  var height = 200;
-  var margin = 50;
-  var x_scale = d3.scaleLog().base(10).domain([10,150]).range([0,200]);
-  var y_scale = d3.scaleLog().base(10).domain([10,150]).range([200,0]);
-  var svg = d3.select("svg");
-  svg.append("g")
-    .attr("transform", `translate(${margin},${margin})`)
-    .selectAll("circle")
-    .data(data)
-    .enter()
-    .append("circle")
-      .attr("cx", function(d) {return x_scale(parseInt(d.AverageCityMPG));})
-      .attr("cy", function(d) {return y_scale(parseInt(d.AverageHighwayMPG));})
-      .attr("r", function(d) {return 2 + parseInt(d.EngineCylinders);});
+  const price_data = await d3.csv("ICO_Composite_Prices.csv");
+  var margin = {top: 50, right: 50, bottom: 50, left: 50}
+    , width = window.innerWidth - margin.left - margin.right
+    , height = window.innerHeight - margin.top - margin.bottom;
+  date_parser = d3.timeParse("%m/%d/%Y");
+  price_data.forEach(function(d) {
+    d.Date = date_parser(d.Date);
+    d.ICO_composite_indicator_USD = parseFloat(d.ICO_composite_indicator_USD);
+  });
+  var x_domain = d3.extent(price_data, price_data => price_data.Date);
+  console.log(x_domain);
+  var y_domain = d3.extent(price_data, price_data => price_data.ICO_composite_indicator_USD);
+  console.log(y_domain);
+  var x_scale = d3.scaleTime().domain(x_domain).range([0, width]);
+  var y_scale = d3.scaleLinear().domain(y_domain).range([height, 0]);
+
+  var line = d3.line()
+      .x(function(d) { return x_scale(d.Date); })
+      .y(function(d) { return y_scale(d.ICO_composite_indicator_USD); });
+
+  var svg = d3.select("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
 
   svg.append("g")
-      .attr("transform", `translate(${margin},${margin})`)
-      .call(d3.axisLeft(y_scale)
-              .tickValues([10,20,50,100])
-              .tickFormat(d3.format("~s"))
-      );
+      .attr("class", "x axis")
+      .attr("transform", `translate(0,${height})`)
+      .call(d3.axisBottom(x_scale).tickFormat(d3.format("~s")))
+      .call(d3.axisBottom(x_scale));
+
   svg.append("g")
-      .attr("transform", `translate(${margin},${height + margin})`)
-      .call(d3.axisBottom(x_scale)
-              .tickValues([10,20,50,100])
-              .tickFormat(d3.format("~s"))
-        );
-      }
+      .attr("class", "y axis")
+      .call(d3.axisLeft(y_scale).tickFormat(d3.format("~s")))
+      .call(d3.axisLeft(y_scale));
+
+  svg.append("path")
+        .datum(price_data)
+        .attr("class", "line")
+        .attr("d", line);
+}
 </script>
 </body>
 </html>
