@@ -48,7 +48,7 @@ async function init() {
   svg.append("g")
       .attr("class", "x axis")
       .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(x_scale));
+      .call(d3.axisBottom(x_scale).ticks(d3.timeYear));
 
   svg.append("g")
       .attr("class", "y axis")
