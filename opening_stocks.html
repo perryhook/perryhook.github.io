@@ -9,55 +9,61 @@ circle {fill: lightblue; stroke: black;}
 
 .line {
     fill: none;
-    stroke: #ffab00;
-    stroke-width: 3;
+    stroke-width: 1;
 }
 </style>
 <body onload='init()'>
+<a href='index.html'>Back</a>
 <svg width=950 height=500></svg>
 <script>
 async function init() {
-  const price_data = await d3.csv("ICO_Composite_Prices.csv");
+  var date_parser = d3.timeParse("%m/%d/%Y");
+  const price_data = await d3.csv("ICO_gross_opening_stocks.csv");
+  price_data.forEach(function(d) {
+    d.Date = date_parser(d.Date);
+    d["1000 60kg Bags"] = +d["1000 60kg Bags"];
+  });
+  nested_price_data = d3.nest().key(function(d) { return d.Country; }).entries(price_data);
   var margin = {top: 50, right: 50, bottom: 50, left: 50}
     , width = window.innerWidth - margin.left - margin.right
     , height = window.innerHeight - margin.top - margin.bottom;
-  date_parser = d3.timeParse("%m/%d/%Y");
-  price_data.forEach(function(d) {
-    d.Date = date_parser(d.Date);
-    d.ICO_composite_indicator_USD = parseFloat(d.ICO_composite_indicator_USD);
-  });
   var x_domain = d3.extent(price_data, price_data => price_data.Date);
-  console.log(x_domain);
-  var y_domain = d3.extent(price_data, price_data => price_data.ICO_composite_indicator_USD);
-  console.log(y_domain);
+  var y_domain = d3.extent(price_data, price_data => price_data["1000 60kg Bags"]);
   var x_scale = d3.scaleTime().domain(x_domain).range([0, width]);
-  var y_scale = d3.scaleLinear().domain(y_domain).range([height, 0]);
+  var y_scale = d3.scaleLinear().domain(y_domain).nice().range([height, 0]);
+  var res = nested_price_data.map(function(d) { return d.key; });
+  console.log(res);
+  // TODO need to get 20 colors or reduce dataset
+  var color_scale = d3.scaleOrdinal(d3.schemeCategory10).domain(res);
 
   var line = d3.line()
       .x(function(d) { return x_scale(d.Date); })
-      .y(function(d) { return y_scale(d.ICO_composite_indicator_USD); });
+      .y(function(d) { return y_scale(d["1000 60kg Bags"]); });
 
   var svg = d3.select("svg")
       .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
+      .attr("height", height + margin.top + margin.bottom);
 
-  svg.append("g")
+  g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  g.append("g")
       .attr("class", "x axis")
       .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(x_scale).tickFormat(d3.format("~s")))
-      .call(d3.axisBottom(x_scale));
+      .call(d3.axisBottom(x_scale).ticks(d3.timeYear));
 
-  svg.append("g")
+  g.append("g")
       .attr("class", "y axis")
-      .call(d3.axisLeft(y_scale).tickFormat(d3.format("~s")))
       .call(d3.axisLeft(y_scale));
 
-  svg.append("path")
-        .datum(price_data)
+  country = g.selectAll(".country")
+    .data(nested_price_data)
+    .enter().append("g")
+      .attr("class", "country");
+
+  country.append("path")
         .attr("class", "line")
-        .attr("d", line);
+        .attr("d", function(d) { return line(d.values); })
+        .attr("stroke", function(d) { return color_scale(d.key); });
 }
 </script>
 </body>
