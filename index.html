@@ -14,7 +14,7 @@ circle {fill: lightblue; stroke: black;}
 }
 </style>
 <body onload='init()'>
-<a href='index2.html'>Click here!</a>
+<a href='opening_stocks.html'>Click here!</a>
 <svg width=950 height=500></svg>
 <script>
 async function init() {
@@ -25,11 +25,12 @@ async function init() {
   date_parser = d3.timeParse("%m/%d/%Y");
   price_data.forEach(function(d) {
     d.Date = date_parser(d.Date);
-    d.ICO_composite_indicator_USD = parseFloat(d.ICO_composite_indicator_USD);
+    d.ICO_composite_indicator_USD = +d.ICO_composite_indicator_USD;
   });
   var x_domain = d3.extent(price_data, price_data => price_data.Date);
   console.log(x_domain);
   var y_domain = d3.extent(price_data, price_data => price_data.ICO_composite_indicator_USD);
+  y_domain[0] = y_domain[0] - (0.1 * (y_domain[1] - y_domain[0]));
   console.log(y_domain);
   var x_scale = d3.scaleTime().domain(x_domain).range([0, width]);
   var y_scale = d3.scaleLinear().domain(y_domain).range([height, 0]);
