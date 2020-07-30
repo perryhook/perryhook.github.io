@@ -31,9 +31,9 @@ async function init() {
   console.log(x_domain);
   var y_domain = d3.extent(price_data, price_data => price_data.ICO_composite_indicator_USD);
   y_domain[0] = y_domain[0] - (0.1 * (y_domain[1] - y_domain[0]));
-  console.log(y_domain);
+  //console.log(y_domain);
   var x_scale = d3.scaleTime().domain(x_domain).range([0, width]);
-  var y_scale = d3.scaleLinear().domain(y_domain).range([height, 0]);
+  var y_scale = d3.scaleLinear().domain(y_domain).nice().range([height, 0]);
 
   var line = d3.line()
       .x(function(d) { return x_scale(d.Date); })
@@ -48,13 +48,11 @@ async function init() {
   svg.append("g")
       .attr("class", "x axis")
       .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(x_scale).tickFormat(d3.format("~s")))
       .call(d3.axisBottom(x_scale));
 
   svg.append("g")
       .attr("class", "y axis")
-      .call(d3.axisLeft(y_scale).tickFormat(d3.format("~s")))
-      .call(d3.axisLeft(y_scale));
+      .call(d3.axisLeft(y_scale).tickFormat(d3.format('$,.2f')));
 
   svg.append("path")
         .datum(price_data)
