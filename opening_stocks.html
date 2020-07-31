@@ -6,10 +6,10 @@
 <script src = 'https://d3js.org/d3.v5.min.js'></script>
 <style> 
 circle {fill: lightblue; stroke: black;}
-
+text {fill: black; font: 12px sans-serif;}
 .line {
     fill: none;
-    stroke-width: 1;
+    stroke-width: 3;
 }
 </style>
 <body onload='init()'>
@@ -18,52 +18,73 @@ circle {fill: lightblue; stroke: black;}
 <script>
 async function init() {
   var date_parser = d3.timeParse("%m/%d/%Y");
-  const price_data = await d3.csv("ICO_gross_opening_stocks.csv");
-  price_data.forEach(function(d) {
+  const stockpile_data = await d3.csv("ICO_gross_opening_stocks_Brazil_Other.csv");
+  // prep data
+  stockpile_data.forEach(function(d) {
     d.Date = date_parser(d.Date);
-    d["1000 60kg Bags"] = +d["1000 60kg Bags"];
+    d.OneK60kgBags = +d.OneK60kgBags;
   });
-  nested_price_data = d3.nest().key(function(d) { return d.Country; }).entries(price_data);
-  var margin = {top: 50, right: 50, bottom: 50, left: 50}
+  // group by ("nest") by GroupedCountry
+  nested_stockpile_data = d3.nest()
+    .key(function(d) { return d.GroupedCountry; }).entries(stockpile_data);
+  var margin = {top: 100, right: 100, bottom: 50, left: 50}
     , width = window.innerWidth - margin.left - margin.right
     , height = window.innerHeight - margin.top - margin.bottom;
-  var x_domain = d3.extent(price_data, price_data => price_data.Date);
-  var y_domain = d3.extent(price_data, price_data => price_data["1000 60kg Bags"]);
+  var x_domain = d3.extent(stockpile_data, stockpile_data => stockpile_data.Date);
+  var y_domain = d3.extent(stockpile_data, stockpile_data => stockpile_data.OneK60kgBags);
   var x_scale = d3.scaleTime().domain(x_domain).range([0, width]);
   var y_scale = d3.scaleLinear().domain(y_domain).nice().range([height, 0]);
-  var res = nested_price_data.map(function(d) { return d.key; });
-  console.log(res);
-  // TODO need to get 20 colors or reduce dataset
+  var res = nested_stockpile_data.map(function(d) { return d.key; });
   var color_scale = d3.scaleOrdinal(d3.schemeCategory10).domain(res);
 
   var line = d3.line()
       .x(function(d) { return x_scale(d.Date); })
-      .y(function(d) { return y_scale(d["1000 60kg Bags"]); });
+      .y(function(d) { return y_scale(d.OneK60kgBags); });
 
   var svg = d3.select("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom);
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom);
 
   g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
   g.append("g")
-      .attr("class", "x axis")
-      .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(x_scale).ticks(d3.timeYear));
+   .attr("class", "x axis")
+   .attr("transform", `translate(0,${height})`)
+   .call(d3.axisBottom(x_scale).ticks(d3.timeYear));
 
   g.append("g")
-      .attr("class", "y axis")
-      .call(d3.axisLeft(y_scale));
+   .attr("class", "y axis")
+   .call(d3.axisLeft(y_scale))
+  // add y axis label
+   .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", "0.71em")
+      .text("1000 60kg Bags");
 
   country = g.selectAll(".country")
-    .data(nested_price_data)
-    .enter().append("g")
-      .attr("class", "country");
+             .data(nested_stockpile_data)
+             .enter()
+             .append("g")
+             .attr("class", "country");
 
   country.append("path")
-        .attr("class", "line")
-        .attr("d", function(d) { return line(d.values); })
-        .attr("stroke", function(d) { return color_scale(d.key); });
+         .attr("class", "line")
+         .attr("d", function(d) { return line(d.values); })
+         .attr("stroke", function(d) { return color_scale(d.key); });
+
+  country.append("text")
+     // -2 to move left slightly
+    .datum(function(d) { return {key: d.key, value: d.values[d.values.length - 2]}; })
+    .attr("transform", function(d) {
+      var y_val;
+      if (d.key == "Brazil") {  // no overlap
+        y_val = d.value.OneK60kgBags + 1100;}
+      else {y_val = d.value.OneK60kgBags - 1100;}
+      return `translate(${x_scale(d.value.Date)},${y_scale(y_val)})`; })
+    .attr("x", 5)
+    .attr("dy", "0.35em")
+    .text(function(d) { return d.key; });
 }
 </script>
 </body>
