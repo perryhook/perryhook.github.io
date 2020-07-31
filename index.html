@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
+<meta charset="utf-8"/>
 </head>
 <script src = 'https://d3js.org/d3.v5.min.js'></script>
+<link rel="stylesheet" type="text/css" href="style.css">
 <style> 
-circle {fill: lightblue; stroke: black;}
-
 .line {
     fill: none;
     stroke: #ffab00;
@@ -14,12 +13,16 @@ circle {fill: lightblue; stroke: black;}
 }
 </style>
 <body onload='init()'>
-<a href='opening_stocks.html'>Click here!</a>
+  <div class="nav">
+    <button class="btn">« Previous</button>
+    <!-- remove the gap -->
+    <button class="btn next_btn" onclick="next()">Next »</button>
+  </div>
 <svg width=950 height=500></svg>
 <script>
 async function init() {
   const price_data = await d3.csv("ICO_Composite_Prices.csv");
-  var margin = {top: 50, right: 50, bottom: 50, left: 50}
+  var margin = {top: 100, right: 100, bottom: 50, left: 50}
     , width = window.innerWidth - margin.left - margin.right
     , height = window.innerHeight - margin.top - margin.bottom;
   date_parser = d3.timeParse("%m/%d/%Y");
@@ -28,7 +31,6 @@ async function init() {
     d.ICO_composite_indicator_USD = +d.ICO_composite_indicator_USD;
   });
   var x_domain = d3.extent(price_data, price_data => price_data.Date);
-  console.log(x_domain);
   var y_domain = d3.extent(price_data, price_data => price_data.ICO_composite_indicator_USD);
   y_domain[0] = y_domain[0] - (0.1 * (y_domain[1] - y_domain[0]));
   //console.log(y_domain);
@@ -46,18 +48,27 @@ async function init() {
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
   svg.append("g")
-      .attr("class", "x axis")
       .attr("transform", `translate(0,${height})`)
       .call(d3.axisBottom(x_scale).ticks(d3.timeYear));
 
   svg.append("g")
-      .attr("class", "y axis")
       .call(d3.axisLeft(y_scale).tickFormat(d3.format('$,.2f')));
+      // add y axis label
+  svg.append("text")
+    .attr("class", "axis_label")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -200)
+    .attr("y", 6)
+    .attr("dy", "0.71em")
+    .text("ICO Composite Price (USD/Pound)");
 
   svg.append("path")
         .datum(price_data)
         .attr("class", "line")
         .attr("d", line);
+}
+function next() {
+  window.location = "opening_stocks.html";
 }
 </script>
 </body>

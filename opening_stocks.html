@@ -1,19 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
+<meta charset="utf-8"/>
 </head>
 <script src = 'https://d3js.org/d3.v5.min.js'></script>
 <style> 
-circle {fill: lightblue; stroke: black;}
-text {fill: black; font: 12px sans-serif;}
 .line {
     fill: none;
     stroke-width: 3;
 }
 </style>
+<link rel="stylesheet" type="text/css" href="style.css">
 <body onload='init()'>
-<a href='index.html'>Back</a>
+<div class="nav">
+  <button class="btn" onclick="previous()">« Previous</button>
+  <!-- remove the gap -->
+  <button class="btn next_btn" onclick="next()">Next »</button>
+</div>
 <svg width=950 height=500></svg>
 <script>
 async function init() {
@@ -48,15 +51,14 @@ async function init() {
   g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
   g.append("g")
-   .attr("class", "x axis")
    .attr("transform", `translate(0,${height})`)
    .call(d3.axisBottom(x_scale).ticks(d3.timeYear));
 
   g.append("g")
-   .attr("class", "y axis")
    .call(d3.axisLeft(y_scale))
   // add y axis label
    .append("text")
+      .attr("class", "axis_label")
       .attr("transform", "rotate(-90)")
       .attr("y", 6)
       .attr("dy", "0.71em")
@@ -85,6 +87,12 @@ async function init() {
     .attr("x", 5)
     .attr("dy", "0.35em")
     .text(function(d) { return d.key; });
+}
+function previous() {
+  window.location="index.html";
+}
+function next() {
+  window.location="dollar_value.html";
 }
 </script>
 </body>
