@@ -17,98 +17,103 @@
 }
 
 </style>
-<body>
+<body onload='init()'>
+  <div class="nav">
+    <button class="btn">« Previous</button>
+    <!-- remove the gap -->
+    <button class="btn next_btn" onclick="next()">Next »</button>
+  </div>
 
-<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<link rel="stylesheet" type="text/css" href="style.css">
+<svg width=950 height=500></svg>
 <script>
-
-// set the dimensions and margins of the graph
-var margin = {top: 100, right: 100, bottom: 50, left: 50}
-  , width = window.innerWidth - margin.left - margin.right
-  , height = window.innerHeight - margin.top - margin.bottom;
-
-// parse the date / time
-var parseTime = d3.timeParse("%m/%d/%Y");
-
-// set the ranges
-var x = d3.scaleTime().range([0, width]);
-var y0 = d3.scaleLinear().range([height, 0]);
-var y1 = d3.scaleLinear().range([height, 0]);
-
-// define the 1st line
-var valueline = d3.line()
-    .x(function(d) { return x(d.date); })
-    .y(function(d) { return y0(d.composite_price); });
-
-// define the 2nd line
-var valueline2 = d3.line()
-    .x(function(d) { return x(d.date); })
-    .y(function(d) { return y1(d.stockpile); });
-
-// append the svg obgect to the body of the page
-// appends a 'group' element to 'svg'
-// moves the 'group' element to the top left margin
-var svg = d3.select("body").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
-
-// Get the data
-d3.csv("overview_data.csv", function(error, data) {
-  if (error) throw error;
-
+async function init() {
+  const data = await d3.csv("overview_data.csv");
   // format the data
+  var parseTime = d3.timeParse("%m/%d/%Y");
   data.forEach(function(d) {
       d.date = parseTime(d.date);
       d.composite_price = parseFloat(d.composite_price);
       d.stockpile = parseFloat(d.stockpile);
   });
+  var flt_stock_data = data.filter(function(d) { return !isNaN(d.stockpile) });
+  //console.log(JSON.stringify(flt_stock_data, null, 2));
 
-  var flt_stockpile_data = data.filter(function(d) { return !isNaN(d.stockpile) });
-  console.log(JSON.stringify(flt_stockpile_data, null, 2));
-  // Scale the range of the data
-  x.domain(d3.extent(data, function(d) { return d.date; }));
+  var margin = {top: 100, right: 100, bottom: 50, left: 50}
+    , width = window.innerWidth - margin.left - margin.right
+    , height = window.innerHeight - margin.top - margin.bottom - 100;
+
+  var x = d3.scaleTime().range([0, width]).domain(d3.extent(data, function(d) { return d.date; }));
   y0_domain = d3.extent(data, data => data.composite_price);
   y0_domain[0] = y0_domain[0] - (0.1 * (y0_domain[1] - y0_domain[0]));
-  
-  y1_domain = d3.extent(flt_stockpile_data, flt_stockpile_data => flt_stockpile_data.stockpile);
+  var y0 = d3.scaleLinear().range([height, 0]).domain(y0_domain);
+  y1_domain = d3.extent(flt_stock_data, flt_stock_data => flt_stock_data.stockpile);
   y1_domain[0] = y1_domain[0] - (0.1 * (y1_domain[1] - y1_domain[0]));
-  y0.domain(y0_domain);
-  y1.domain(y1_domain);
-  //y1.domain([0, d3.max(flt_stockpile_data, function(d) {return Math.max(d.stockpile); })]);
+  var y1 = d3.scaleLinear().range([height, 0]).domain(y1_domain);
 
-  // Add the valueline path.
+  // price line 
+  var priceline = d3.line()
+      .x(function(d) { return x(d.date); })
+      .y(function(d) { return y0(d.composite_price); });
+
+  // stockpile line 
+  var stockline = d3.line()
+      .x(function(d) { return x(d.date); })
+      .y(function(d) { return y1(d.stockpile); });
+
+  var svg = d3.select("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // Add the priceline path.
   svg.append("path")
       .data([data])
       .attr("class", "line")
-      .attr("d", valueline);
+      .attr("d", priceline);
 
-  // Add the valueline2 path.
+  // Add the stockpile path.
   svg.append("path")
-      .data([flt_stockpile_data])
+      .data([flt_stock_data])
       .attr("class", "line")
       .style("stroke", "red")
-      .attr("d", valueline2);
+      .attr("d", stockline);
 
   // Add the X Axis
   svg.append("g")
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x));
+      .attr("transform", `translate(0,${height})`)
+      .call(d3.axisBottom(x).ticks(d3.timeYear));
 
   // Add the Y0 Axis
   svg.append("g")
       .attr("class", "axisSteelBlue")
-      .call(d3.axisLeft(y0));
+      .call(d3.axisLeft(y0).tickFormat(d3.format('$,.2f')));
+
+  svg.append("text")
+    .attr("class", "axis_label")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -200)
+    .attr("y", 6)
+    .attr("dy", "0.71em")
+    .text("ICO Composite Price (USD/Pound)");
 
   // Add the Y1 Axis
   svg.append("g")
-      .attr("class", "axisRed")
-      .attr("transform", "translate( " + width + ", 0 )")
-      .call(d3.axisRight(y1));
+     .attr("class", "axisRed")
+     .attr("transform", "translate( " + width + ", 0 )")
+     .call(d3.axisRight(y1));
 
-});
+  svg.append("text")
+     .attr("class", "axis_label")
+     .attr("transform", "rotate(-90)")
+     .attr("x", -100)
+     .attr("y", width - 15)
+     .attr("dy", "0.71em")
+     .text("1000 60kg Bags");
+
+}
 
 </script>
 </body>
