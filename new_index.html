@@ -37,13 +37,14 @@ async function init() {
   y1_domain[0] = y1_domain[0] - (0.1 * (y1_domain[1] - y1_domain[0]));
   var y1 = d3.scaleLinear().range([height, 0]).domain(y1_domain);
 
-  // price line 
+  // price line
   var priceline = d3.line()
       .x(function(d) { return x(d.date); })
       .y(function(d) { return y0(d.composite_price); });
 
-  // stockpile line 
+  // stockpile line
   var stockline = d3.line()
+      .defined(function(d) { return d.stockpile > 0; })
       .x(function(d) { return x(d.date); })
       .y(function(d) { return y1(d.stockpile); });
 
@@ -53,22 +54,19 @@ async function init() {
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // add the priceline path.
+  // add the priceline path
   svg.append("path")
       .data([data])
       .attr("class", "line")
       .attr("id", "priceline")
       .attr("d", priceline);
 
-  // Add the stockpile path.
+  // add the stockpile path
   svg.append("path")
       .data([flt_stock_data])
       .attr("class", "line")
       .attr("id", "stockline")
-      .style("stroke", "red")
       .attr("d", stockline);
-
-//  d3.selectAll(".line").style("opacity", "0");
 
   // add the x axis
   svg.append("g")
@@ -90,38 +88,79 @@ async function init() {
 
   // add the y1 axis
   svg.append("g")
-      .attr("id", "stockline_axis")
+     .attr("class", "right_axis")
+     .attr("id", "stockline_axis")
      .attr("transform", "translate( " + width + ", 0 )")
      .call(d3.axisRight(y1));
 
   svg.append("text")
-     .attr("class", "axis_label")
+     .attr("class", "axis_label right_axis")
+     .attr("id", "stockline_axis_label")
      .attr("transform", "rotate(-90)")
      .attr("x", -100)
      .attr("y", width - 15)
      .attr("dy", "0.71em")
      .text("1000 60kg Bags");
+  d3.select("#stockline_axis,#stockline_axis_label").style("opacity", "0");
+
+  d3.selectAll(".line")
+    .on("mouseover", function() {
+      console.log("in mouseover");
+      d3.select(this).transition().duration("10")
+        .style("opacity", "0.5")
+        .style("stroke-width", "6");})
+    .on("mouseout", function() {
+      console.log("in mouseout");
+      d3.select(this).transition().duration("10")
+        .style("opacity", "1")
+        .style("stroke-width", "3");});
+
 
   animatelines();
 }
 
 function animatelines() {
+  console.log("animatelines called with state: " + state);
+
     if(state === null) {
-      //d3.selectAll(".line").style("opacity", "0");
-      d3.select("#priceline").style("opacity", "1").style("stroke-width", 4);
+      d3.selectAll(".line,.right_axis").style("opacity", "0");
+      d3.select("#priceline").style("opacity", "1").style("stroke-width", 6);
       var totalLength = d3.select("#priceline").node().getTotalLength();
       d3.selectAll("#priceline")
         .attr("stroke-dasharray", totalLength + " " + totalLength)
         .attr("stroke-dashoffset", totalLength)
-        .transition()
-        .duration(5000)
+        .transition("drawPriceLine")
+        .duration(3000)
         .ease(d3.easeLinear)
         .attr("stroke-dashoffset", 0);
       state = 0;
+    } else if (state == 0) {
+      d3.select("#stockline_axis_label,#stockline_axis").style("opacity", "0");
+      var totalLength = d3.select("#stockline").node().getTotalLength();
+      d3.select("#stockline").style("opacity", "1").style("stroke-width", 6);
+      d3.select("#stockline")
+        .attr("stroke-dasharray", totalLength + " " + totalLength)
+        .attr("stroke-dashoffset", totalLength)
+        .transition("drawStockLine")
+        .duration(3000)
+        .ease(d3.easeLinear)
+        .attr("stroke-dashoffset", 0);
+      d3.selectAll("#stockline_axis_label,#stockline_axis")
+        .style("opacity", "0")
+        .transition("drawStockLine")
+        .delay(2500)
+        .duration(500)
+        .style("opacity", "1");
+      state = 1;
     }
+
+    d3.selectAll(".line").style("stroke-width", 3);
 }
 
-function reset() { state = null; }
+function reset() { 
+  state = null;
+  animatelines();
+}
 function next() { animatelines(); }
 </script>
 </body>

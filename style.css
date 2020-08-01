@@ -14,11 +14,11 @@
 }
 
 #stockline {
-  stroke: red;
+  stroke: #E27D60;
 }
 
 #stockline_axis text{
-  fill: red;
+  fill: #E27D60;
 }
 
 .nav {
