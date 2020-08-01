@@ -1,0 +1,5 @@
+#E27D60  pinkish-orange
+#85DCB   light-blue
+#E8A87C  light orange
+#C38D9E  light purple
+#41B3A3  sea green
