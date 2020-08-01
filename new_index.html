@@ -1,33 +1,18 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<style> /* set the CSS */
-
-.line {
-  fill: none;
-  stroke: steelblue;
-  stroke-width: 2px;
-}
-
-.axisSteelBlue text{
-  fill: steelblue;
-}
-
-.axisRed text{
-  fill: red;
-}
-
-</style>
-<body onload='init()'>
-  <div class="nav">
-    <button class="btn">« Previous</button>
-    <!-- remove the gap -->
-    <button class="btn next_btn" onclick="next()">Next »</button>
-  </div>
-
-<script src="https://d3js.org/d3.v5.min.js"></script>
 <link rel="stylesheet" type="text/css" href="style.css">
+<script src="https://d3js.org/d3.v5.min.js"></script>
+
+<body onload='init()'>
+<div class="nav">
+  <button class="btn" onclick="reset()">« Reset</button>
+  <!-- remove the gap -->
+  <button class="btn next_btn" onclick="next()">Next »</button>
+</div>
 <svg width=950 height=500></svg>
+
 <script>
+var state = null;
 async function init() {
   const data = await d3.csv("overview_data.csv");
   // format the data
@@ -68,27 +53,31 @@ async function init() {
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // Add the priceline path.
+  // add the priceline path.
   svg.append("path")
       .data([data])
       .attr("class", "line")
+      .attr("id", "priceline")
       .attr("d", priceline);
 
   // Add the stockpile path.
   svg.append("path")
       .data([flt_stock_data])
       .attr("class", "line")
+      .attr("id", "stockline")
       .style("stroke", "red")
       .attr("d", stockline);
 
-  // Add the X Axis
+//  d3.selectAll(".line").style("opacity", "0");
+
+  // add the x axis
   svg.append("g")
       .attr("transform", `translate(0,${height})`)
       .call(d3.axisBottom(x).ticks(d3.timeYear));
 
-  // Add the Y0 Axis
+  // add the y0 axis
   svg.append("g")
-      .attr("class", "axisSteelBlue")
+      .attr("id", "priceline_axis")
       .call(d3.axisLeft(y0).tickFormat(d3.format('$,.2f')));
 
   svg.append("text")
@@ -99,9 +88,9 @@ async function init() {
     .attr("dy", "0.71em")
     .text("ICO Composite Price (USD/Pound)");
 
-  // Add the Y1 Axis
+  // add the y1 axis
   svg.append("g")
-     .attr("class", "axisRed")
+      .attr("id", "stockline_axis")
      .attr("transform", "translate( " + width + ", 0 )")
      .call(d3.axisRight(y1));
 
@@ -113,8 +102,26 @@ async function init() {
      .attr("dy", "0.71em")
      .text("1000 60kg Bags");
 
+  animatelines();
 }
 
+function animatelines() {
+    if(state === null) {
+      //d3.selectAll(".line").style("opacity", "0");
+      d3.select("#priceline").style("opacity", "1").style("stroke-width", 4);
+      var totalLength = d3.select("#priceline").node().getTotalLength();
+      d3.selectAll("#priceline")
+        .attr("stroke-dasharray", totalLength + " " + totalLength)
+        .attr("stroke-dashoffset", totalLength)
+        .transition()
+        .duration(5000)
+        .ease(d3.easeLinear)
+        .attr("stroke-dashoffset", 0);
+      state = 0;
+    }
+}
+
+function reset() { state = null; }
+function next() { animatelines(); }
 </script>
 </body>
-

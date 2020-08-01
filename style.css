@@ -1,12 +1,29 @@
-line {
-    fill: none;
-    stroke: #000;
-    shape-rendering: crispEdges;
+.line {
+  fill: none;
+  stroke: #000;
+  stroke-opacity: 1;
+  stroke-width: 3px;
+}
+
+#priceline {
+  stroke: #41B3A3;
+}
+
+#priceline_axis text{
+  fill: #41B3A3;
+}
+
+#stockline {
+  stroke: red;
+}
+
+#stockline_axis text{
+  fill: red;
 }
 
 .nav {
-    float: right;
-    font-size: 0;
+  float: right;
+  font-size: 0;
 }
 .btn {
   font-family: sans-serif;
@@ -21,10 +38,10 @@ line {
   cursor: pointer;
   background-color: white; 
   color: black; 
-  border: 2px solid steelblue;
+  border: 2px solid #41B3A3;
 }
 .btn:hover {
-  background-color: steelblue;
+  background-color: #41B3A3;
   color: white;
 }
 
