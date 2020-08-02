@@ -12,15 +12,26 @@
 </style>
 <link rel="stylesheet" type="text/css" href="style.css">
 <body onload='init()'>
+<div class="title">
+  <h2>Coffee Producing Country Stockpiles</h2>
+</div>
+<div class="slidetext" id="stockpile_text">
+  Coffee producing countries sometimes hold green coffee for a year or more before export. While cup quality decreases 
+  substantially for green coffee beyond one year from harvest, growers can reap better
+  prices if the market shifts in their favor before selling their beans. As the largest and 
+  most dominant country in coffee production, Brazil has the ability to move the market 
+  by stockpiling or exporting stockpiled green coffee. This behavior in the early 2000s helped
+  create the increase in prices between 2004 and 2011 
+</div>
 <div class="nav">
-  <button class="btn" onclick="previous()">« Previous</button>
-  <!-- remove the gap -->
-  <button class="btn next_btn" onclick="next()">Next »</button>
+  <button class="btn" id="back_btn" onclick="back()">« Back</button>
 </div>
 <svg width=950 height=500></svg>
+
 <script>
 async function init() {
   var date_parser = d3.timeParse("%m/%d/%Y");
+  var year_time_format = d3.timeFormat("%Y");
   const stockpile_data = await d3.csv("ICO_gross_opening_stocks_Brazil_Other.csv");
   // prep data
   stockpile_data.forEach(function(d) {
@@ -30,9 +41,9 @@ async function init() {
   // group by ("nest") by GroupedCountry
   nested_stockpile_data = d3.nest()
     .key(function(d) { return d.GroupedCountry; }).entries(stockpile_data);
-  var margin = {top: 100, right: 100, bottom: 50, left: 50}
+  var margin = {top: 50, right: 100, bottom: 50, left: 50}
     , width = window.innerWidth - margin.left - margin.right
-    , height = window.innerHeight - margin.top - margin.bottom;
+    , height = window.innerHeight - margin.top - margin.bottom - 250;
   var x_domain = d3.extent(stockpile_data, stockpile_data => stockpile_data.Date);
   var y_domain = d3.extent(stockpile_data, stockpile_data => stockpile_data.OneK60kgBags);
   var x_scale = d3.scaleTime().domain(x_domain).range([0, width]);
@@ -64,7 +75,7 @@ async function init() {
       .attr("dy", "0.71em")
       .text("1000 60kg Bags");
 
-  country = g.selectAll(".country")
+  var country = g.selectAll(".country")
              .data(nested_stockpile_data)
              .enter()
              .append("g")
@@ -81,18 +92,39 @@ async function init() {
     .attr("transform", function(d) {
       var y_val;
       if (d.key == "Brazil") {  // no overlap
-        y_val = d.value.OneK60kgBags + 1100;}
-      else {y_val = d.value.OneK60kgBags - 1100;}
+        y_val = d.value.OneK60kgBags + 2000;}
+      else {y_val = d.value.OneK60kgBags - 2000;}
       return `translate(${x_scale(d.value.Date)},${y_scale(y_val)})`; })
     .attr("x", 5)
     .attr("dy", "0.35em")
+    .attr("fill", function(d) { return color_scale(d.key); })
     .text(function(d) { return d.key; });
+  
+  // TODO left off adding tooltips
+  // This isn't working. Not sure why yet.  See stackoverflow
+  country.selectAll("circle")
+    .data(function(d) {return d.values})
+    .enter()
+    .append("circle")
+    .attr("class", "tooltip")
+    .attr("r", "5")
+    .attr("cx", function(d) { return x_scale(d.Date); })
+    .attr("cy", function(d) { return y_scale(d.OneK60kgBags); })
+    .style("stroke", function(d) { return color_scale(d.GroupedCountry); })
+    .style("fill", function(d) { return color_scale(d.GroupedCountry); })
+    .style("opacity", "0");
+  d3.selectAll(".tooltip")
+    .on("mouseover", function() {
+      d3.select(this).transition().duration(50)
+        .style("opacity", "1");
+    })
+    .on("mouseout", function() {
+      d3.select(this).transition().duration(10)
+        .style("opacity", "0");
+    });
 }
-function previous() {
+function back() {
   window.location="index.html";
-}
-function next() {
-  window.location="dollar_value.html";
 }
 </script>
 </body>
