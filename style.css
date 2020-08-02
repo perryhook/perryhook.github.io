@@ -29,6 +29,10 @@ circle {
     shape-rendering: crispEdges;
 }
 
+.drilldownline {
+  opacity: 0.6;
+}
+
 .priceline {
   stroke: #41B3A3;
 }
@@ -48,18 +52,22 @@ circle {
 }
 
 .slidetext {
+  float: left;
   margin-left: 10px;
   width: 50%;
   height: 4em;
+}
+
+#stockpile_text {
+  width: 75%;
 }
 
 .nav {
   float: left;
   font-size: 0;
   margin-left: 20px;
-  margin-top: 20px;
+  margin-top: 0px;
 }
-
 
 .btn {
   font: 14px sans-serif;
@@ -97,4 +105,11 @@ circle {
 #reset_btn:hover {
   background-color: #41B3A3;
   color: white;
-
+}
+#back_btn {
+  border: 2px solid #41B3A3;
+}
+#back_btn:hover {
+  background-color: #41B3A3;
+  color: white;
+}

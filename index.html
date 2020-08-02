@@ -93,7 +93,6 @@ async function init() {
 
    //add priceline label
   first_price_data = data[6];
-  console.log(first_price_data);
   svg.append("text")
     .attr("class", "priceline priceline_label label")
     .attr("x", x(first_price_data.date))
@@ -153,7 +152,7 @@ async function init() {
   var price_tooltip = svg.selectAll(".pricetooltip").data(data).enter().append("circle");
   price_tooltip
       .attr("class", "pricetooltip priceline")
-      .attr("r", 5)
+      .attr("r", "5")
       .attr("cx", function(d) { return x(d.date); })
       .attr("cy", function(d) { return y0(d.composite_price); })
       .style("fill", "#41B3A3")
@@ -161,7 +160,7 @@ async function init() {
       .on("mouseover", function(d) {
       if (lines_drawn["priceline"]) {
         d3.select(this).transition().duration(no_time*50)
-          .style("opacity", "1")
+          .style("opacity", "1");
         div
           .style("border-color", "#41B3A3")
           .transition().duration(no_time*50)
