@@ -101,7 +101,11 @@ async function init() {
     .text(function(d) { return d.key; });
   
   // TODO left off adding tooltips
-  // This isn't working. Not sure why yet.  See stackoverflow
+  const div = d3.select("body") 
+    .append("div")
+    .attr("class", "tooltip")
+    .style("opacity", "0");
+
   country.selectAll("circle")
     .data(function(d) {return d.values})
     .enter()
@@ -112,15 +116,25 @@ async function init() {
     .attr("cy", function(d) { return y_scale(d.OneK60kgBags); })
     .style("stroke", function(d) { return color_scale(d.GroupedCountry); })
     .style("fill", function(d) { return color_scale(d.GroupedCountry); })
-    .style("opacity", "0");
-  d3.selectAll(".tooltip")
-    .on("mouseover", function() {
-      d3.select(this).transition().duration(50)
-        .style("opacity", "1");
-    })
+    .style("opacity", "0")
+    .on("mouseover", function(d) {
+        d3.select(this).transition().duration(50)
+            .style("opacity", "1");
+        console.log(d);
+        div
+        .style("border-color", color_scale(d.GroupedCountry))
+          .transition().duration(50)
+          .attr("class", "tooltip")
+          .style("opacity", "1");
+        div.html(year_time_format(d.Date) 
+                 + "<br/>"
+                 + Math.round(d.OneK60kgBags,0).toLocaleString() + " K Bags")
+        .style("left", (d3.event.pageX) + "px")
+        .style("top", (d3.event.pageY - 50) + "px");
+      })
     .on("mouseout", function() {
-      d3.select(this).transition().duration(10)
-        .style("opacity", "0");
+      d3.selectAll(".tooltip").transition().duration(10)
+          .style("opacity", "0");
     });
 }
 function back() {
