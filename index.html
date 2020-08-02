@@ -4,7 +4,7 @@
 <script src="https://d3js.org/d3.v5.min.js"></script>
 <body onload='init()'>
 <div class="title">
-The Green Coffee Price Spike of 2011
+  <h2>The Green Coffee Price Spike of 2011</h2>
 </div>
 <div class="intro">
 
@@ -171,16 +171,45 @@ async function init() {
       }
     });
 
-
-  var max_price = {date: new Date(2011, 03), composite_price: 2.3124};
-  console.log(max_price);
+  // annotation green price
+  var max_price = {date: new Date(2011, 3), composite_price: 2.3124};  //3 is April
+  var min_price = {date: new Date(2001, 8), composite_price: 0.41};   //8 is Sept
+  console.log(min_price);
   svg.append("circle")
-    .attr("class", "price_highlight")
+    .attr("class", "annotation1 annotation price_highlight")
+    .attr("r", 10)
+    .attr("cx", x(min_price.date))
+    .attr("cy", y0(min_price.composite_price))
+    .style("opacity", "0");
+  svg.append("text")  // delay by about 2500?
+    .attr("class", "annotation1 annotation")
+    .attr("x", x(min_price.date))
+    .attr("y", y0(min_price.composite_price))
+    .attr("dx", "0.8em")
+    .attr("dy", "1.3em")
+    .text("$0.41/lb - September, 2001 - Lowest prices in over 28 years");
+  d3.selectAll(".annotation1").style("opacity", "0");
+  svg.append("circle")
+    .attr("class", "annotation2 annotation price_highlight")
     .attr("r", 10)
     .attr("cx", x(max_price.date))
     .attr("cy", y0(max_price.composite_price))
     .style("opacity", "0");
-
+  svg.append("text")
+    .attr("class", "annotation2 annotation")
+    .attr("x", x(max_price.date))
+    .attr("y", y0(max_price.composite_price))
+    .attr("dx", "1.7em")
+    .attr("dy", "0.3em")
+    .text("$2.31/lb - April, 2011: Highest prices in over 30 years")
+  svg.append("text")
+    .attr("class", "annotation2 annotation")
+    .attr("x", x(max_price.date.setDate(max_price.date.getDate())))
+    .attr("y", y0(max_price.composite_price))
+    .attr("dx", "2em")
+    .attr("dy", "1.4em")
+    .text("463% increase over September, 2001 prices")
+  d3.selectAll(".annotation2 annotation").style("opacity", "0");
 
   d3.selectAll(".drilldownline")
     .on("mouseover", function() {
@@ -195,7 +224,6 @@ async function init() {
           .style("opacity", "1")
           .style("stroke-width", "3"); }
     });
-
 
   animatelines();
 }
@@ -212,11 +240,15 @@ function animatelines() {
       d3.selectAll("#priceline")
         .attr("stroke-dasharray", totalLength + " " + totalLength)
         .attr("stroke-dashoffset", totalLength)
-        .transition("drawPriceLine").duration(3000)
+        .transition("drawPriceLine").duration(5000)  // reset to 5000
         .ease(d3.easeLinear)
         .attr("stroke-dashoffset", 0);
-      d3.selectAll(".price_highlight")
-        .transition("drawPriceHighlight").delay(3000).duration(1000)
+      d3.selectAll(".annotation1")
+        .transition("drawPriceHighlight").delay(2000).duration(1000)
+        .ease(d3.easeCubic)
+        .style("opacity", "1");
+      d3.selectAll(".annotation2")
+        .transition("drawPriceHighlight").delay(3300).duration(1000)
         .ease(d3.easeCubic)
         .style("opacity", "1");
       state = 0;
@@ -251,6 +283,7 @@ function reset() {
   for(const key of Object.keys(lines_drawn)) {
     lines_drawn[key] = false;
   }
+  d3.selectAll("annotation").style("opacity", "0");
   animatelines();
 }
 function next() { animatelines(); }
