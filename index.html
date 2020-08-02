@@ -7,11 +7,7 @@
   <h2>The Green Coffee Price Spike of 2011</h2>
 </div>
 <div class="slidetext">
-Green coffee prices tend to be quite volatile, especially over long periods of time. Driven by many factors, the economics of
-coffee prices are complex. In 2011, prices hit a 30-year high. Explore some of the factors that went
-into this spike through this narrative visualization.
 </div>
-<div></div>
 <div class="nav">
   <button class="btn" id="start_btn" onclick="next()">Start »</button>
   <button class="btn" id="reset_btn" onclick="reset()">« Reset</button>
@@ -22,6 +18,10 @@ into this spike through this narrative visualization.
 
 <script>
 var state = null;
+var init_text = "Green coffee prices tend to be quite volatile, especially over long periods "
+              + "of time. Driven by many factors, the economics of coffee prices are complex. "
+              + "In 2011, prices hit a 30-year high. Explore some of the factors that went "
+              + "into this spike through this narrative visualization.";
 var stockpile_text = "Some coffee growing countries will stockpile green coffee, waiting for "
                    + "favorable prices, and perhaps in some cases, driving prices upward.";
 
@@ -30,6 +30,7 @@ var lines_drawn = {
   "stockline": false
 }
 async function init() {
+  d3.selectAll(".slidetext").text(init_text);
   const data = await d3.csv("overview_data.csv");
   // format the data
   var parseTime = d3.timeParse("%m/%d/%Y");
@@ -206,15 +207,15 @@ async function init() {
     .attr("class", "annotation2 annotation")
     .attr("x", x(max_price.date))
     .attr("y", y0(max_price.composite_price))
-    .attr("dx", "1.7em")
-    .attr("dy", "0.3em")
+    .attr("dx", "0.5em")
+    .attr("dy", "-1em")
     .text("$2.31/lb - April, 2011 - Highest prices in over 30 years")
   svg.append("text")
     .attr("class", "annotation2 annotation")
     .attr("x", x(max_price.date.setDate(max_price.date.getDate())))
     .attr("y", y0(max_price.composite_price))
-    .attr("dx", "2em")
-    .attr("dy", "1.4em")
+    .attr("dx", "1em")
+    .attr("dy", "0.4em")
     .text("463% increase over September, 2001 prices")
   d3.selectAll(".annotation2 annotation").style("opacity", "0");
 
@@ -307,6 +308,7 @@ function animatelines() {
 
 function reset() { 
   state = null;
+  d3.selectAll(".slidetext").text(init_text);
   for(const key of Object.keys(lines_drawn)) {
     lines_drawn[key] = false;
   }
