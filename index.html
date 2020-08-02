@@ -17,13 +17,16 @@
 <svg width=950 height=500></svg>
 
 <script>
+// TODO remove next line
+var no_time = 0;
 var state = null;
 var init_text = "Green coffee prices tend to be quite volatile, especially over long periods "
               + "of time. Driven by many factors, the economics of coffee prices are complex. "
               + "In 2011, prices hit a 30-year high. Explore some of the factors that went "
               + "into this spike through this narrative visualization.";
 var stockpile_text = "Some coffee growing countries will stockpile green coffee, waiting for "
-                   + "favorable prices, and perhaps in some cases, driving prices upward.";
+                   + "favorable prices, and perhaps in the case of the largest producers, "
+                   + "driving prices upward.";
 
 var lines_drawn = {
   "priceline": false,
@@ -157,11 +160,11 @@ async function init() {
       .style("opacity", "0")
       .on("mouseover", function(d) {
       if (lines_drawn["priceline"]) {
-        d3.select(this).transition().duration(50)
+        d3.select(this).transition().duration(no_time*50)
           .style("opacity", "1")
         div
           .style("border-color", "#41B3A3")
-          .transition().duration(50)
+          .transition().duration(no_time*50)
           .attr("class", "tooltip pricelinetooltip")
           .style("opacity", "1");
         div.html(
@@ -172,9 +175,9 @@ async function init() {
     })
     .on("mouseout", function() {
       if (lines_drawn["priceline"]) {
-        d3.select(this).transition().duration(10)
+        d3.select(this).transition().duration(no_time*10)
           .style("opacity", "0");
-        div.transition().duration(10)
+        div.transition().duration(no_time*10)
           .style("opacity", "0");
       }
     });
@@ -219,16 +222,51 @@ async function init() {
     .text("463% increase over September, 2001 prices")
   d3.selectAll(".annotation2 annotation").style("opacity", "0");
 
+  // stockline tooltips
+  var stockline_tooltip = svg.selectAll(".stockline_tooltip")
+    .data(flt_stock_data).enter().append("circle");
+  stockline_tooltip
+      .attr("class", "stockline_tooltip stockline")
+      .attr("r", 5)
+      .attr("cx", function(d) { return x(d.date); })
+      .attr("cy", function(d) { return y1(d.stockpile); })
+      .style("fill", "#E27D60")
+      .style("opacity", "0")
+      .on("mouseover", function(d) {
+      if (lines_drawn["stockline"]) {
+        d3.select(this).transition().duration(no_time*50)
+          .style("opacity", "1")
+        div
+          .style("border-color", "#E27D60")
+          .transition().duration(no_time*50)
+          .attr("class", "tooltip stocklinetooltip")
+          .style("opacity", "1");
+        div.html(year_time_format(d.date) 
+                 + "<br/>"
+                 + Math.round(d.stockpile,0).toLocaleString() + " K Bags")
+        .style("left", (d3.event.pageX) + "px")
+        .style("top", (d3.event.pageY - 50) + "px");
+      }
+    })
+    .on("mouseout", function() {
+      if (lines_drawn["stockline"]) {
+        d3.select(this).transition().duration(no_time*10)
+          .style("opacity", "0");
+        div.transition().duration(no_time*10)
+          .style("opacity", "0");
+      }
+    });
+
   d3.selectAll(".drilldownline")
     .on("mouseover", function() {
       if (lines_drawn[this.id]) {
-        d3.select(this).transition().duration("50")
+        d3.select(this).transition().duration(no_time*"50")
           .style("opacity", "0.5")
           .style("stroke-width", "6"); }
     })
     .on("mouseout", function() {
       if (lines_drawn[this.id]) {
-        d3.select(this).transition().duration("10")
+        d3.select(this).transition().duration(no_time*"10")
           .style("opacity", "1")
           .style("stroke-width", "3"); }
     });
@@ -251,53 +289,53 @@ function animatelines() {
       d3.select("#start_btn").style("display", "none");
       d3.selectAll("#reset_btn,#next_btn")
         .style("display", "inline")
-        .transition("unhideNav").delay(5000).duration(500)
+        .transition("unhideNav").delay(no_time*5000).duration(no_time*500)
         .ease(d3.easeCubic)
         .style("opacity", "1")
       d3.selectAll(".line,.right_axis").style("opacity", "0");
       d3.select("#priceline").style("opacity", "1").style("stroke-width", 6);
       var totalLength = d3.select("#priceline").node().getTotalLength();
-      d3.selectAll(".priceline_label").transition("pricelineLabel").duration(100)
+      d3.selectAll(".priceline_label").transition("pricelineLabel").duration(no_time*100)
         .style("opacity", "1");
       d3.selectAll("#priceline")
         .attr("stroke-dasharray", totalLength + " " + totalLength)
         .attr("stroke-dashoffset", totalLength)
-        .transition("drawPriceLine").duration(5000)  // reset to 5000
+        .transition("drawPriceLine").duration(no_time*5000)  // reset to 5000
         .ease(d3.easeLinear)
         .attr("stroke-dashoffset", 0);
       d3.selectAll(".annotation1")
-        .transition("drawPriceHighlight").delay(2000).duration(1000)
+        .transition("drawPriceHighlight").delay(no_time*2000).duration(no_time*1000)
         .ease(d3.easeCubic)
         .style("opacity", "1");
       d3.selectAll(".annotation2")
-        .transition("drawPriceHighlight").delay(3300).duration(1000)
+        .transition("drawPriceHighlight").delay(no_time*3300).duration(no_time*1000)
         .ease(d3.easeCubic)
         .style("opacity", "1");
       state = 1;
       lines_drawn.priceline = true;
     } else if (state == 1) {
       d3.selectAll(".slidetext")
-        .transition().duration(1000)
+        .transition().duration(no_time*1000)
         .style("opacity", "0")
         .text(stockpile_text)
-        .transition().delay(500).duration(1000)
+        .transition().delay(no_time*500).duration(no_time*1000)
         .style("opacity", "1");
       d3.selectAll(".stockline_axis,.stockline_label").style("opacity", "0");
       var totalLength = d3.select("#stockline").node().getTotalLength();
-      d3.selectAll(".stockline_label").transition("stocklineLabel").duration(100)
+      d3.selectAll(".stockline_label").transition("stocklineLabel").duration(no_time*100)
         .style("opacity", "1");
       d3.select("#stockline")
         .style("opacity", "1").style("stroke-width", 6)
         .attr("stroke-dasharray", totalLength + " " + totalLength)
         .attr("stroke-dashoffset", totalLength)
         .transition("drawStockLine")
-        .duration(3000)
+        .duration(no_time*3000)
         .ease(d3.easeLinear)
         .attr("stroke-dashoffset", 0);
       d3.selectAll(".stockline_axis")
         .style("opacity", "0")
         .transition("drawStockLine")
-        .duration(500)
+        .duration(no_time*500)
         .style("opacity", "1");
       state = 2;
       lines_drawn.stockline = true;
