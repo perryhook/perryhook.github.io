@@ -6,18 +6,25 @@
 <div class="title">
   <h2>The Green Coffee Price Spike of 2011</h2>
 </div>
-<div class="intro">
-
+<div class="slidetext">
+Green coffee prices tend to be quite volatile, especially over long periods of time. Driven by many factors, the economics of
+coffee prices are complex. In 2011, prices hit a 30-year high. Explore some of the factors that went
+into this spike through this narrative visualization.
 </div>
+<div></div>
 <div class="nav">
-  <button class="btn" onclick="reset()">« Reset</button>
+  <button class="btn" id="start_btn" onclick="next()">Start »</button>
+  <button class="btn" id="reset_btn" onclick="reset()">« Reset</button>
   <!-- remove the gap -->
-  <button class="btn next_btn" onclick="next()">Next »</button>
+  <button class="btn" id="next_btn" onclick="next()">Next »</button>
 </div>
 <svg width=950 height=500></svg>
 
 <script>
 var state = null;
+var stockpile_text = "Some coffee growing countries will stockpile green coffee, waiting for "
+                   + "favorable prices, and perhaps in some cases, driving prices upward.";
+
 var lines_drawn = {
   "priceline": false,
   "stockline": false
@@ -36,9 +43,9 @@ async function init() {
   var flt_stock_data = data.filter(function(d) { return !isNaN(d.stockpile) });
   //console.log(JSON.stringify(flt_stock_data, null, 2));
 
-  var margin = {top: 100, right: 100, bottom: 50, left: 50}
+  var margin = {top: 50, right: 100, bottom: 50, left: 50}
     , width = window.innerWidth - margin.left - margin.right
-    , height = window.innerHeight - margin.top - margin.bottom - 100;
+    , height = window.innerHeight - margin.top - margin.bottom - 250;
 
   var x = d3.scaleTime().range([0, width]).domain(d3.extent(data, function(d) { return d.date; }));
   y0_domain = d3.extent(data, data => data.composite_price);
@@ -84,7 +91,7 @@ async function init() {
   first_price_data = data[6];
   console.log(first_price_data);
   svg.append("text")
-    .attr("class", "priceline priceline_label")
+    .attr("class", "priceline priceline_label label")
     .attr("x", x(first_price_data.date))
     .attr("y", y0(first_price_data.composite_price + .1))
     .style("opacity", "0")
@@ -94,7 +101,7 @@ async function init() {
   first_stock_data = flt_stock_data[1];
   console.log(first_stock_data);
   svg.append("text")
-    .attr("class", "stockline stockline_label")
+    .attr("class", "stockline stockline_label label")
     .attr("x", x(first_stock_data.date))
     .attr("y", y1(first_stock_data.stockpile + 1000))
     .style("opacity", "0")
@@ -201,7 +208,7 @@ async function init() {
     .attr("y", y0(max_price.composite_price))
     .attr("dx", "1.7em")
     .attr("dy", "0.3em")
-    .text("$2.31/lb - April, 2011: Highest prices in over 30 years")
+    .text("$2.31/lb - April, 2011 - Highest prices in over 30 years")
   svg.append("text")
     .attr("class", "annotation2 annotation")
     .attr("x", x(max_price.date.setDate(max_price.date.getDate())))
@@ -230,8 +237,22 @@ async function init() {
 
 function animatelines() {
   console.log("animatelines called with state: " + state);
-
     if(state === null) {
+      d3.selectAll(".line,.label,.annotation,.right_axis")
+        .style("opacity", "0");
+      d3.selectAll("#next_btn,#reset_btn")
+        .style("display", "none")
+        .style("opacity", "0");
+      d3.selectAll("#start_btn")
+        .style("display", "inline");
+      state = 0;
+    } else if (state == 0) {
+      d3.select("#start_btn").style("display", "none");
+      d3.selectAll("#reset_btn,#next_btn")
+        .style("display", "inline")
+        .transition("unhideNav").delay(5000).duration(500)
+        .ease(d3.easeCubic)
+        .style("opacity", "1")
       d3.selectAll(".line,.right_axis").style("opacity", "0");
       d3.select("#priceline").style("opacity", "1").style("stroke-width", 6);
       var totalLength = d3.select("#priceline").node().getTotalLength();
@@ -251,15 +272,21 @@ function animatelines() {
         .transition("drawPriceHighlight").delay(3300).duration(1000)
         .ease(d3.easeCubic)
         .style("opacity", "1");
-      state = 0;
+      state = 1;
       lines_drawn.priceline = true;
-    } else if (state == 0) {
-      d3.select(".stockline_axis,.stockline_label").style("opacity", "0");
+    } else if (state == 1) {
+      d3.selectAll(".slidetext")
+        .transition().duration(1000)
+        .style("opacity", "0")
+        .text(stockpile_text)
+        .transition().delay(500).duration(1000)
+        .style("opacity", "1");
+      d3.selectAll(".stockline_axis,.stockline_label").style("opacity", "0");
       var totalLength = d3.select("#stockline").node().getTotalLength();
-      d3.select("#stockline").style("opacity", "1").style("stroke-width", 6);
       d3.selectAll(".stockline_label").transition("stocklineLabel").duration(100)
         .style("opacity", "1");
       d3.select("#stockline")
+        .style("opacity", "1").style("stroke-width", 6)
         .attr("stroke-dasharray", totalLength + " " + totalLength)
         .attr("stroke-dashoffset", totalLength)
         .transition("drawStockLine")
@@ -271,7 +298,7 @@ function animatelines() {
         .transition("drawStockLine")
         .duration(500)
         .style("opacity", "1");
-      state = 1;
+      state = 2;
       lines_drawn.stockline = true;
     }
 
@@ -283,9 +310,11 @@ function reset() {
   for(const key of Object.keys(lines_drawn)) {
     lines_drawn[key] = false;
   }
-  d3.selectAll("annotation").style("opacity", "0");
   animatelines();
 }
-function next() { animatelines(); }
+function next() { 
+  console.log("next called");
+  animatelines();
+}
 </script>
 </body>

@@ -37,6 +37,8 @@ circle {
   stroke: #E27D60;
 }
 
+.axis_label {fill: black; font: 12px sans-serif;}
+
 #priceline_axis text{
   fill: #41B3A3;
 }
@@ -45,10 +47,19 @@ circle {
   fill: #E27D60;
 }
 
-.nav {
-  float: right;
-  font-size: 0;
+.slidetext {
+  margin-left: 10px;
+  width: 50%;
+  height: 4em;
 }
+
+.nav {
+  float: left;
+  font-size: 0;
+  margin-left: 20px;
+  margin-top: 20px;
+}
+
 
 .btn {
   font: 14px sans-serif;
@@ -62,16 +73,28 @@ circle {
   cursor: pointer;
   background-color: white; 
   color: black; 
-  border: 2px solid #41B3A3;
 }
-.btn:hover {
+#start_btn {
+  border: 2px solid #E27D60;
+}
+#start_btn:hover {
+  background-color: #E27D60;
+  color: white;
+}
+#next_btn {
+  border: 2px solid #41B3A3;
+  border-left:0;
+  opacity: 0;
+}
+#next_btn:hover {
   background-color: #41B3A3;
   color: white;
 }
-
-.next_btn {
-  border-left:0;
-  margin-right: 100px;
+#reset_btn {
+  border: 2px solid #41B3A3;
+  opacity: 0;
 }
+#reset_btn:hover {
+  background-color: #41B3A3;
+  color: white;
 
-.axis_label {fill: black; font: 12px sans-serif;}
