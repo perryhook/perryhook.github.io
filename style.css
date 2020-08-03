@@ -49,6 +49,10 @@ circle {
   stroke: #C38D9E;
 }
 
+.retailline {
+  stroke: #E8A87C;
+}
+
 .axis_label {fill: black; font: 12px sans-serif;}
 
 #priceline_axis text{
@@ -67,23 +71,15 @@ circle {
   fill: #C38D9E;
 }
 
+#retailline_axis text{
+  fill: #E8A87C;
+}
+
 .slidetext {
   float: left;
   margin-left: 10px;
   width: 75%;
   height: 4em;
-}
-
-#production_text {
-  width: 75%;
-}
-
-#stockpile_text {
-  width: 75%;
-}
-
-#import_text {
-  width: 75%;
 }
 
 .nav {
