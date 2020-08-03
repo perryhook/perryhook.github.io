@@ -19,7 +19,6 @@ div.tooltip {
 .line {
   fill: none;
   stroke-opacity: 1;
-  stroke-width: 2px;
 }
 
 circle {
@@ -38,7 +37,15 @@ circle {
   stroke: #41B3A3;
 }
 
+.priceline_label {
+  stroke: #41B3A3;
+}
+
 .productionline {
+  stroke: #158A5C;
+}
+
+.productionline_label {
   stroke: #158A5C;
 }
 
@@ -46,7 +53,15 @@ circle {
   stroke: #E27D60;
 }
 
+.stockline_label {
+  stroke: #E27D60;
+}
+
 .importline {
+  stroke: #C38D9E;
+}
+
+.importline_label {
   stroke: #C38D9E;
 }
 
@@ -54,26 +69,38 @@ circle {
   stroke: #E8A87C;
 }
 
-.axis_label {fill: black; font: 12px sans-serif;}
+.retailline_label {
+  stroke: #E8A87C;
+}
+
+.axis_label {
+    font-size: 12px;
+    font-family: sans-serif;
+}
 
 #priceline_axis text{
   fill: #41B3A3;
+  font-weight: bold;
 }
 
-#productionline_axis text{
-    fill: #158A5C;
+.productionline_axis text{
+  fill: #158A5C;
+  font-weight: bold;
 }
 
-#stockline_axis text{
+.stockline_axis text{
   fill: #E27D60;
+  font-weight: bold;
 }
 
-#importline_axis text{
+.importline_axis text{
   fill: #C38D9E;
+  font-weight: bold;
 }
 
-#retailline_axis text{
+.retailline_axis text{
   fill: #E8A87C;
+  font-weight: bold;
 }
 
 .slidetext {
@@ -114,6 +141,7 @@ circle {
   border: 2px solid #41B3A3;
   border-left:0;
   opacity: 0;
+  display: none;
 }
 #next_btn:hover {
   background-color: #41B3A3;
@@ -122,6 +150,7 @@ circle {
 #reset_btn {
   border: 2px solid #41B3A3;
   opacity: 0;
+  display: none;
 }
 #reset_btn:hover {
   background-color: #41B3A3;

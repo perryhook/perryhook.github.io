@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+</head>
+<script src = 'https://d3js.org/d3.v5.min.js'></script>
+<style> 
+.line {
+    fill: none;
+    stroke-width: 3;
+}
+</style>
+<link rel="stylesheet" type="text/css" href="style.css">
+<body onload='init()'>
+<div class="title">
+  <h2>Coffee Production by Country</h2>
+  <h3>Top 5 Producers</h3>
+</div>
+<div class="slidetext" id="production_text">
+  Coffee production is affected by a number of factors including the weather, 
+  disease, natural distasters, and planting or removal of crops. Coffee plants
+  exhibit cycles of productivity on an annual basis, with bumper crops often 
+  followed by a reduced harvest. We can see this pattern in Brazil's
+  production. Colombia was affected by a coffee rust outbreak between 2008 and 
+  2011, causing the visible dip in their green coffee output during this period.
+</div>
+<div class="nav">
+  <button class="btn" id="back_btn" onclick="back()">« Back</button>
+</div>
+<svg width=950 height=500></svg>
+
+<script>
+async function init() {
+  var date_parser = d3.timeParse("%m/%d/%Y");
+  var year_time_format = d3.timeFormat("%Y");
+  const data = await d3.csv("ICO_production_top_5_other.csv");
+  // prep data
+  data.forEach(function(d) {
+    d.Date = date_parser(d.Date);
+    d.OneK60kgBags = +d.OneK60kgBags;
+  });
+  // group by ("nest") by GroupedCountry
+  nested_data = d3.nest()
+    .key(function(d) { return d.GroupedCountry; }).entries(data);
+  var margin = {top: 50, right: 100, bottom: 50, left: 50}
+    , width = window.innerWidth - margin.left - margin.right
+    , height = window.innerHeight - margin.top - margin.bottom - 250;
+  var x_domain = d3.extent(data, data => data.Date);
+  var y_domain = d3.extent(data, data => data.OneK60kgBags);
+  var x_scale = d3.scaleTime().domain(x_domain).range([0, width]);
+  var y_scale = d3.scaleLog().domain(y_domain).nice().range([height, 0]);
+  var res = nested_data.map(function(d) { return d.key; });
+  var color_scale = d3.scaleOrdinal(d3.schemeCategory10).domain(res);
+
+  var line = d3.line()
+      .x(function(d) { return x_scale(d.Date); })
+      .y(function(d) { return y_scale(d.OneK60kgBags); });
+
+  var svg = d3.select("svg")
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom);
+
+  g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  g.append("g")
+   .attr("transform", `translate(0,${height})`)
+   .call(d3.axisBottom(x_scale).ticks(d3.timeYear));
+
+  g.append("g")
+   .call(d3.axisLeft(y_scale))
+  // add y axis label
+   .append("text")
+      .attr("class", "axis_label")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", "0.71em")
+      .text("1000 60kg Bags");
+
+  var country = g.selectAll(".country")
+             .data(nested_data)
+             .enter()
+             .append("g")
+             .attr("class", "country");
+
+  country.append("path")
+         .attr("class", "line")
+         .attr("d", function(d) { return line(d.values); })
+         .attr("stroke", function(d) { return color_scale(d.key); });
+
+  country.append("text")
+     // -2 to move left slightly
+    .datum(function(d) { return {key: d.key, value: d.values[d.values.length - 2]}; })
+    .attr("transform", function(d) {
+      return `translate(${x_scale(d.value.Date)},${y_scale(d.value.OneK60kgBags)})`; })
+    .attr("x", 5)
+    .attr("dy", "0.35em")
+    .attr("fill", function(d) { return color_scale(d.key); })
+    .text(function(d) { return d.key; });
+
+  const div = d3.select("body")
+    .append("div")
+    .attr("class", "tooltip")
+    .style("opacity", "0");
+
+  country.selectAll("circle")
+    .data(function(d) {return d.values})
+    .enter()
+    .append("circle")
+    .attr("class", "tooltip")
+    .attr("r", "5")
+    .attr("cx", function(d) { return x_scale(d.Date); })
+    .attr("cy", function(d) { return y_scale(d.OneK60kgBags); })
+    .style("stroke", function(d) { return color_scale(d.GroupedCountry); })
+    .style("fill", function(d) { return color_scale(d.GroupedCountry); })
+    .style("opacity", "0")
+    .on("mouseover", function(d) {
+        d3.select(this).transition().duration(50)
+            .style("opacity", "1");
+        div
+        .style("border-color", color_scale(d.GroupedCountry))
+          .transition().duration(50)
+          .attr("class", "tooltip")
+          .style("opacity", "1");
+        div.html(d.GroupedCountry
+                 + "<br/>"
+                 + year_time_format(d.Date)
+                 + "<br/>"
+                 + Math.round(d.OneK60kgBags,0).toLocaleString() + " K Bags")
+        .style("left", (d3.event.pageX) + "px")
+        .style("top", (d3.event.pageY - 50) + "px");
+      })
+    .on("mouseout", function() {
+      d3.selectAll(".tooltip").transition().duration(10)
+          .style("opacity", "0");
+    });
+}
+function back() {
+  window.location="index.html";
+}
+</script>
+</body>
+</html>

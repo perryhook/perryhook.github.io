@@ -143,8 +143,8 @@ async function init() {
       .data([data])
       .attr("class", "priceline line")
       .attr("id", "priceline")
-      .attr("d", priceline)
-      .style("stroke-width", "4px");
+      .attr("d", priceline);
+      //.style("stroke-width", "4px");
 
   // add the productionline path
   svg.append("path")
@@ -177,7 +177,7 @@ async function init() {
    //add priceline label
   first_price_data = data[6];
   svg.append("text")
-    .attr("class", "priceline priceline_label label")
+    .attr("class", "priceline_label label")
     .attr("x", x(first_price_data.date))
     .attr("y", y0(first_price_data.composite_price))
     .attr("dx", "-1em")
@@ -188,7 +188,7 @@ async function init() {
   //add productionline label
   first_production_data = flt_prod_data[1];
   svg.append("text")
-    .attr("class", "productionline productionline_label label")
+    .attr("class", "productionline_label label")
     .attr("x", x(first_production_data.date))
     .attr("y", y1(first_production_data.production))
     .attr("dy", "-2em")
@@ -198,7 +198,7 @@ async function init() {
   //add stockline label
   first_stock_data = flt_stock_data[1];
   svg.append("text")
-    .attr("class", "stockline stockline_label label")
+    .attr("class", "stockline_label label")
     .attr("x", x(first_stock_data.date))
     .attr("y", y2(first_stock_data.stockpile + 1000))
     .style("opacity", "0")
@@ -207,7 +207,7 @@ async function init() {
   //add importline label
   first_import_data = flt_import_data[6];
   svg.append("text")
-    .attr("class", "importline importline_label label")
+    .attr("class", "importline_label label")
     .attr("x", x(first_import_data.date))
     .attr("y", y3(first_import_data.all_imports))
     .attr("dy", "1em")
@@ -217,7 +217,7 @@ async function init() {
   //add retailline label
   first_retail_data = flt_retail_data[2];
   svg.append("text")
-    .attr("class", "retailline retailline_label label")
+    .attr("class", "retailline_label label")
     .attr("x", x(first_retail_data.date))
     .attr("y", y4(first_retail_data.USA_retail_price_USD))
     .attr("dx", "0.5em")
@@ -245,7 +245,7 @@ async function init() {
 
   // add the y1 axis
   svg.append("g")
-     .attr("class", "productionline productionline_axis right_axis")
+     .attr("class", "productionline_axis right_axis")
      .attr("transform", "translate( " + width + ", 0 )")
      .call(d3.axisRight(y1));
 
@@ -260,7 +260,7 @@ async function init() {
 
   // add the y2 axis
   svg.append("g")
-     .attr("class", "stockline stockline_axis right_axis")
+     .attr("class", "stockline_axis right_axis")
      .attr("transform", "translate( " + width + ", 0 )")
      .call(d3.axisRight(y2));
 
@@ -275,7 +275,7 @@ async function init() {
 
   // add the y3 axis
   svg.append("g")
-     .attr("class", "importline importline_axis right_axis")
+     .attr("class", "importline_axis right_axis")
      .attr("transform", "translate( " + width + ", 0 )")
      .call(d3.axisRight(y3));
 
@@ -290,7 +290,7 @@ async function init() {
 
   // add the y4 axis
   svg.append("g")
-     .attr("class", "retailline retailline_axis right_axis")
+     .attr("class", "retailline_axis axis_label right_axis")
      .attr("transform", "translate( " + width + ", 0 )")
      .call(d3.axisRight(y4).tickFormat(d3.format('$,.2f')));
 
@@ -521,30 +521,12 @@ async function init() {
       }
     });
 
-  d3.selectAll(".drilldownline")
-    .on("mouseover", function() {
-      if (lines_drawn[this.id]) {
-        d3.select(this).transition().duration(no_time*50)
-          .style("opacity", "1")
-          .style("stroke-width", "6px"); }
-    })
-    .on("mouseout", function() {
-      if (lines_drawn[this.id]) {
-        d3.select(this).transition().duration(no_time*10)
-          .style("opacity", "0.6")
-          .style("stroke-width", "2px"); }
-    });
-  d3.select(".stockline")
-   .on("click", function() {
-     window.location = "opening_stocks.html";
-    });
 
   animatelines();
 }
 
 function animatelines() {
-  d3.selectAll(".label").style("stroke-width", "2px");
-    if(state === null) {
+  if(state === null) {
       d3.selectAll(".line,.label,.annotation,.right_axis")
         .style("opacity", "0");
       d3.selectAll("#next_btn,#reset_btn")
@@ -553,11 +535,11 @@ function animatelines() {
       d3.selectAll("#start_btn")
         .style("display", "inline");
       state = 0;
-    } else if (state == 0) {
+  } else if (state == 0) {
       d3.select("#start_btn").style("display", "none");
       d3.selectAll("#reset_btn,#next_btn")
         .style("display", "inline")
-        .transition("unhideNav").delay(no_time*5000).duration(no_time*500)
+        .transition("unhideNav").duration(no_time*500)
         .ease(d3.easeCubic)
         .style("opacity", "1")
       d3.selectAll(".line,.right_axis").style("opacity", "0");
@@ -700,6 +682,33 @@ function animatelines() {
         .style("opacity", "1");
       state = 5;
       lines_drawn.retailline = true;
+    // add drilldown capabilities
+    d3.selectAll(".drilldownline")
+    .on("mouseover", function() {
+      if (lines_drawn[this.id]) {
+        d3.select(this).transition().duration(no_time*50)
+          .style("opacity", "1")
+          .style("stroke-width", "6px"); }
+    })
+    .on("mouseout", function() {
+      if (lines_drawn[this.id]) {
+        d3.select(this).transition().duration(no_time*10)
+          .style("opacity", "0.6")
+          .style("stroke-width", "2px"); }
+    });
+    // remove next button
+    d3.select("#next_btn").style("display", "none");
+
+    // setup drilldown links
+    d3.select(".stockline")
+    .on("click", function() {
+      window.location = "opening_stocks.html";
+      });
+    d3.select(".productionline")
+    .on("click", function() {
+      window.location = "production_top_5.html";
+      });
+
     }
     d3.selectAll(".label").style("stroke-width", "2px");
 }
@@ -710,10 +719,13 @@ function reset() {
   for(const key of Object.keys(lines_drawn)) {
     lines_drawn[key] = false;
   }
+  d3.selectAll(".drilldownline")
+    .on("mouseover", null)
+    .on("mouseout", null)
+    .on("click", null)
   animatelines();
 }
 function next() { 
-  console.log("next called");
   animatelines();
 }
 </script>
