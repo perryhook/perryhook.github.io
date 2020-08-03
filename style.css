@@ -37,6 +37,10 @@ circle {
   stroke: #41B3A3;
 }
 
+.productionline {
+  stroke: #158A5C;
+}
+
 .stockline {
   stroke: #E27D60;
 }
@@ -45,6 +49,10 @@ circle {
 
 #priceline_axis text{
   fill: #41B3A3;
+}
+
+#productionline_axis text{
+    fill: #158A5C;
 }
 
 #stockline_axis text{
