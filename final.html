@@ -20,23 +20,6 @@
 // TODO remove next line
 var no_time = 1;
 var state = null;
-var init_text = "Green coffee prices tend to be quite volatile, especially over long periods "
-              + "of time. Driven by many factors, the economics of coffee prices are complex. "
-              + "In 2011, prices hit a 30-year high. Explore some of the factors that went "
-              + "into this spike through this narrative visualization.";
-var production_text = "Coffee production has ups and downs that depend on many different factors, "
-                    + "including weather, plant diseases such as coffee rust, and normal crop cycles, but the trend "
-                    + "over the last 30 years is generally upward. Brazil is "
-                    + "by far the largest player in the green coffee market, with global "
-                    + "prices following the latest news about Brazil's crop.";
-var stockpile_text = "Some coffee growing countries will stockpile green coffee, waiting for "
-                   + "favorable prices, and perhaps in the case of the largest producers like, "
-                   + "Brazil, driving prices upward.";
-var import_text = "Imports of green coffee by consumer countries have steadily increased since "
-                + "1995, indicating rising demand. Starbucks had it's IPO in 1992, and can be "
-                + "credited with the rise in popularity of coffee as a beverage worldwide since "
-                + "the 1990s. Coffee shifted from a simple way to wake up in the morning to a "
-                + "small daily luxury and status symbol for those with discretionary income.";
 var retail_text = "Retail prices were driven up by the price spike in 2011, including the US "
                 + "market (shown). Coffee is typically purchased by roasters using futures "
                 + 'contracts rather than the "spot" market, often months or years in advance. '
@@ -51,8 +34,6 @@ var lines_drawn = {
   "retailline": false
 }
 async function init() {
-  d3.selectAll(".slidetext").text(init_text);
-
   var margin = {top: 50, right: 100, bottom: 50, left: 50}
     , width = window.innerWidth - margin.left - margin.right
     , height = window.innerHeight - margin.top - margin.bottom - 250;
@@ -525,160 +506,38 @@ async function init() {
 }
 
 function animatelines() {
-  if(state === null) {
-      d3.selectAll(".line,.label,.annotation,.right_axis")
-        .style("opacity", "0");
-      d3.selectAll("#next_btn,#reset_btn")
-        .style("display", "none")
-        .style("opacity", "0");
-      d3.selectAll("#start_btn")
-        .style("display", "inline");
-      state = 0;
-  } else if (state == 0) {
       d3.select("#start_btn").style("display", "none");
-      d3.selectAll("#reset_btn,#next_btn")
+      d3.selectAll("#reset_btn")
         .style("display", "inline")
-        .transition("unhideNav").duration(no_time*500)
-        .ease(d3.easeCubic)
         .style("opacity", "1")
-      d3.selectAll(".line,.right_axis").style("opacity", "0");
       d3.select("#priceline").style("opacity", "1").style("stroke-width", "6px");
-      var totalLength = d3.select("#priceline").node().getTotalLength();
-      d3.selectAll(".priceline_label").transition("pricelineLabel").duration(no_time*100)
-        .style("opacity", "1");
-      d3.selectAll("#priceline")
-        .attr("stroke-dasharray", totalLength + " " + totalLength)
-        .attr("stroke-dashoffset", totalLength)
-        .transition("drawPriceLine").duration(no_time*5000)  // reset to 5000
-        .ease(d3.easeLinear)
-        .attr("stroke-dashoffset", 0);
-      d3.selectAll(".annotation1")
-        .transition("drawPriceHighlight").delay(no_time*2000).duration(no_time*1000)
-        .ease(d3.easeCubic)
-        .style("opacity", "1");
-      d3.selectAll(".annotation2")
-        .transition("drawPriceHighlight").delay(no_time*3300).duration(no_time*1000)
-        .ease(d3.easeCubic)
-        .style("opacity", "1");
-      state = 1;
+      d3.selectAll(".priceline_label").style("opacity", "1");
+      d3.selectAll(".annotation1").style("opacity", "1");
+      d3.selectAll(".annotation2").style("opacity", "1");
       lines_drawn.priceline = true;
-    } else if (state == 1) {
-      d3.selectAll(".slidetext")
-        .transition().duration(no_time*1000)
-        .style("opacity", "0")
-        .text(production_text)
-        .transition().delay(no_time*500).duration(no_time*1000)
-        .style("opacity", "1");
       d3.selectAll(".productionline_axis,.productionline_label").style("opacity", "0");
       var totalLength = d3.select("#productionline").node().getTotalLength();
-      d3.selectAll(".productionline_label").transition("productionlineLabel").duration(no_time*100)
-        .style("opacity", "1");
-      d3.select("#productionline")
-        .style("opacity", "1").style("stroke-width", "6px")
-        .attr("stroke-dasharray", totalLength + " " + totalLength)
-        .attr("stroke-dashoffset", totalLength)
-        .transition("drawProdLine")
-        .duration(no_time*3000)
-        .ease(d3.easeLinear)
-        .attr("stroke-dashoffset", 0);
-      d3.selectAll(".productionline_axis")
-        .style("opacity", "0")
-        .transition("drawProdLine")
-        .duration(no_time*500)
-        .style("opacity", "1");
-      state = 2;
+      d3.selectAll(".productionline_label").style("opacity", "1");
+      d3.select("#productionline").style("opacity", "1").style("stroke-width", "2px");
+      d3.selectAll(".productionline_axis").style("opacity", "0");
       lines_drawn.productionline = true;
-    } else if (state == 2) {
-      d3.selectAll(".slidetext")
-        .transition().duration(no_time*1000)
-        .style("opacity", "0")
-        .text(stockpile_text)
-        .transition().delay(no_time*500).duration(no_time*1000)
-        .style("opacity", "1");
-      d3.selectAll(".productionline_axis")
-        .transition("fadeProdLine").duration(no_time*1000)
-        .style("opacity", "0");
-      d3.selectAll(".productionline,.productionline_label").transition().duration(500)
-        .style("stroke-width", "2px");
-      d3.selectAll(".stockline_axis,.stockline_label").style("opacity", "0");
-      var totalLength = d3.select("#stockline").node().getTotalLength();
-      d3.selectAll(".stockline_label").transition("stocklineLabel").duration(no_time*100)
-        .style("opacity", "1");
-      d3.select("#stockline")
-        .style("opacity", "1").style("stroke-width", "6px")
-        .attr("stroke-dasharray", totalLength + " " + totalLength)
-        .attr("stroke-dashoffset", totalLength)
-        .transition("drawStockLine")
-        .duration(no_time*3000)
-        .ease(d3.easeLinear)
-        .attr("stroke-dashoffset", 0);
-      d3.selectAll(".stockline_axis")
-        .style("opacity", "0")
-        .transition("drawStockLine")
-        .duration(no_time*500)
-        .style("opacity", "1");
-      state = 3;
+      d3.selectAll(".productionline_axis").style("opacity", "0");
+      d3.selectAll(".productionline,.productionline_label").style("stroke-width", "2px");
+      d3.selectAll(".stockline_label").style("opacity", "1");
+      d3.select("#stockline").style("opacity", "1").style("stroke-width", "2px");
       lines_drawn.stockline = true;
-    } else if (state == 3) {
-      d3.selectAll(".slidetext")
-        .transition().duration(no_time*1000)
-        .style("opacity", "0")
-        .text(import_text)
-        .transition().delay(no_time*500).duration(no_time*1000)
-        .style("opacity", "1");
-      d3.selectAll(".stockline_axis")
-        .transition().duration(no_time*1000)
-        .style("opacity", "0");
-      d3.selectAll(".stockline,.stockline_label").transition("fadeStockpileLine").duration(no_time*500)
-        .style("stroke-width", "2px");
-      d3.selectAll(".importline_axis,.importline_label").style("opacity", "0");
-      var totalLength = d3.select("#importline").node().getTotalLength();
-      d3.selectAll(".importline_label").transition("importlineLabel").duration(no_time*100)
-        .style("opacity", "1");
-      d3.select("#importline")
-        .style("opacity", "1").style("stroke-width", "6px")
-        .attr("stroke-dasharray", totalLength + " " + totalLength)
-        .attr("stroke-dashoffset", totalLength)
-        .transition("drawImportLine")
-        .duration(no_time*3000)
-        .ease(d3.easeLinear)
-        .attr("stroke-dashoffset", 0);
-      d3.selectAll(".importline_axis")
-        .style("opacity", "0")
-        .transition("drawImportLine")
-        .duration(no_time*500)
-        .style("opacity", "1");
-      state = 4;
+      d3.selectAll(".stockline_axis").style("opacity", "0");
+      d3.selectAll(".stockline,.stockline_label").style("stroke-width", "2px");
+      d3.selectAll(".importline_label").style("opacity", "1");
+      d3.select("#importline").style("opacity", "1").style("stroke-width", "2px");
+      d3.selectAll(".importline_axis").style("opacity", "0");
       lines_drawn.importline = true;
-    } else if (state == 4) {  // change stockline to import and import to retail
-      d3.selectAll(".slidetext")
-        .transition().duration(no_time*1000)
-        .style("opacity", "0")
-        .text(retail_text)
-        .transition().delay(no_time*500).duration(no_time*1000)
-        .style("opacity", "1");
-      d3.selectAll(".importline_axis")
-        .transition("fadeImportLine").duration(no_time*1000)
-        .style("opacity", "0");
-      d3.selectAll(".importline").transition().duration(500)
-        .style("stroke-width", "2px");
-      d3.selectAll(".retailline_axis,.retailline_label").style("opacity", "0");
-      var totalLength = d3.select("#retailline").node().getTotalLength();
-      d3.selectAll(".retailline_label").transition("retaillineLabel").duration(no_time*100)
-        .style("opacity", "1");
-      d3.select("#retailline")
-        .style("opacity", "1").style("stroke-width", "6px")
-        .attr("stroke-dasharray", totalLength + " " + totalLength)
-        .attr("stroke-dashoffset", totalLength)
-        .transition("drawRetailLine")
-        .duration(no_time*3000)
-        .ease(d3.easeLinear)
-        .attr("stroke-dashoffset", 0);
-      d3.selectAll(".retailline_axis")
-        .style("opacity", "0")
-        .transition("drawRetailLine")
-        .duration(no_time*500)
-        .style("opacity", "1");
+      d3.selectAll(".slidetext").text(retail_text).style("opacity", "1");
+      d3.selectAll(".importline_axis").style("opacity", "0");
+      d3.selectAll(".importline").style("stroke-width", "2px");
+      d3.selectAll(".retailline_label").style("opacity", "1");
+      d3.select("#retailline").style("opacity", "1").style("stroke-width", "6px");
+      d3.selectAll(".retailline_axis").style("opacity", "1");
       state = 5;
       lines_drawn.retailline = true;
     // add drilldown capabilities
@@ -708,24 +567,11 @@ function animatelines() {
       window.location = "production_top_5.html";
       });
 
-    }
     d3.selectAll(".label").style("stroke-width", "2px");
 }
 
 function reset() { 
-  state = null;
-  d3.selectAll(".slidetext").text(init_text);
-  for(const key of Object.keys(lines_drawn)) {
-    lines_drawn[key] = false;
-  }
-  d3.selectAll(".drilldownline")
-    .on("mouseover", null)
-    .on("mouseout", null)
-    .on("click", null)
-  animatelines();
-}
-function next() { 
-  animatelines();
+    window.location = "index.html";
 }
 </script>
 </body>
