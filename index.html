@@ -18,7 +18,7 @@
 
 <script>
 // TODO remove next line
-var no_time = 0;
+var no_time = 1;
 var state = null;
 var init_text = "Green coffee prices tend to be quite volatile, especially over long periods "
               + "of time. Driven by many factors, the economics of coffee prices are complex. "
@@ -524,13 +524,13 @@ async function init() {
   d3.selectAll(".drilldownline")
     .on("mouseover", function() {
       if (lines_drawn[this.id]) {
-        d3.select(this).transition().duration(no_time*"50")
+        d3.select(this).transition().duration(no_time*50)
           .style("opacity", "1")
           .style("stroke-width", "6px"); }
     })
     .on("mouseout", function() {
       if (lines_drawn[this.id]) {
-        d3.select(this).transition().duration(no_time*"10")
+        d3.select(this).transition().duration(no_time*10)
           .style("opacity", "0.6")
           .style("stroke-width", "2px"); }
     });
@@ -646,7 +646,7 @@ function animatelines() {
         .transition().delay(no_time*500).duration(no_time*1000)
         .style("opacity", "1");
       d3.selectAll(".stockline_axis")
-        .transition("fadeStockpileLine").duration(no_time*1000)
+        .transition().duration(no_time*1000)
         .style("opacity", "0");
       d3.selectAll(".stockline,.stockline_label").transition("fadeStockpileLine").duration(no_time*500)
         .style("stroke-width", "2px");

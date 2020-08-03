@@ -99,9 +99,8 @@ async function init() {
     .attr("dy", "0.35em")
     .attr("fill", function(d) { return color_scale(d.key); })
     .text(function(d) { return d.key; });
-  
-  // TODO left off adding tooltips
-  const div = d3.select("body") 
+
+  const div = d3.select("body")
     .append("div")
     .attr("class", "tooltip")
     .style("opacity", "0");
@@ -120,7 +119,6 @@ async function init() {
     .on("mouseover", function(d) {
         d3.select(this).transition().duration(50)
             .style("opacity", "1");
-        console.log(d);
         div
         .style("border-color", color_scale(d.GroupedCountry))
           .transition().duration(50)
