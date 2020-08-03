@@ -45,6 +45,10 @@ circle {
   stroke: #E27D60;
 }
 
+.importline {
+  stroke: #C38D9E;
+}
+
 .axis_label {fill: black; font: 12px sans-serif;}
 
 #priceline_axis text{
@@ -59,14 +63,26 @@ circle {
   fill: #E27D60;
 }
 
+#importline_axis text{
+  fill: #C38D9E;
+}
+
 .slidetext {
   float: left;
   margin-left: 10px;
-  width: 50%;
+  width: 75%;
   height: 4em;
 }
 
+#production_text {
+  width: 75%;
+}
+
 #stockpile_text {
+  width: 75%;
+}
+
+#import_text {
   width: 75%;
 }
 

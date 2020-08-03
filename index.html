@@ -32,14 +32,25 @@ var production_text = "Coffee production has ups and downs that depend on many d
 var stockpile_text = "Some coffee growing countries will stockpile green coffee, waiting for "
                    + "favorable prices, and perhaps in the case of the largest producers like, "
                    + "Brazil, driving prices upward.";
+var import_text = "Imports of green coffee by consumer countries have steadily increased since "
+                + "1995, indicating rising demand. Starbucks had it's IPO in 1992, and can be "
+                + "credited with the rise in popularity of coffee as a beverage worldwide. Coffee "
+                + "shifted from a simple way to wake up in the morning to a small daily luxury "
+                + "and status symbol for those with discretionary income.";
 
 var lines_drawn = {
   "priceline": false,
   "stockline": false,
-  "productionline": false
+  "productionline": false,
+  "importline": false
 }
 async function init() {
   d3.selectAll(".slidetext").text(init_text);
+
+  var margin = {top: 50, right: 100, bottom: 50, left: 50}
+    , width = window.innerWidth - margin.left - margin.right
+    , height = window.innerHeight - margin.top - margin.bottom - 250;
+
   const data = await d3.csv("overview_data.csv");
   // format the data
   var parseTime = d3.timeParse("%m/%d/%Y");
@@ -50,31 +61,33 @@ async function init() {
       d.composite_price = parseFloat(d.composite_price);
       d.stockpile = parseFloat(d.stockpile);
       d.production = parseFloat(d.production);
+      d.all_imports = parseFloat(d.all_imports);
   });
-  var flt_stock_data = data.filter(function(d) { return !isNaN(d.stockpile) });
-  //console.log(JSON.stringify(flt_stock_data, null, 2));
-
-  var margin = {top: 50, right: 100, bottom: 50, left: 50}
-    , width = window.innerWidth - margin.left - margin.right
-    , height = window.innerHeight - margin.top - margin.bottom - 250;
-
+  // set up left axis
   var x = d3.scaleTime().range([0, width]).domain(d3.extent(data, function(d) { return d.date; }));
   y0_domain = d3.extent(data, data => data.composite_price);
   y0_domain[0] = y0_domain[0] - (0.1 * (y0_domain[1] - y0_domain[0]));
   var y0 = d3.scaleLinear().range([height, 0]).domain(y0_domain).nice();
-  //production data prep
+  //production axis 
   var flt_prod_data = data.filter(function(d) { return !isNaN(d.production) });
   dbl_flt_prod_data = flt_prod_data.slice(1);  // remove the forced initial 0
   y1_domain = d3.extent(dbl_flt_prod_data, dbl_flt_prod_data => dbl_flt_prod_data.production);
   y1_domain[0] = y1_domain[0] - (0.1 * (y1_domain[1] - y1_domain[0]));
   var y1 = d3.scaleLinear().range([height, 0]).domain(y1_domain).nice();
 
-  //stockpile data prep
+  //stockpile axis 
   var flt_stock_data = data.filter(function(d) { return !isNaN(d.stockpile) });
   dbl_flt_stock_data = flt_stock_data.slice(1);  // remove the forced initial 0
   y2_domain = d3.extent(dbl_flt_stock_data, dbl_flt_stock_data => dbl_flt_stock_data.stockpile);
   y2_domain[0] = y2_domain[0] - (0.1 * (y2_domain[1] - y2_domain[0]));
   var y2 = d3.scaleLinear().range([height, 0]).domain(y2_domain).nice();
+
+  //import axis 
+  var flt_import_data = data.filter(function(d) { return !isNaN(d.all_imports) });
+  dbl_flt_import_data = flt_import_data.slice(1);  // remove the forced initial 0
+  y3_domain = d3.extent(dbl_flt_import_data, dbl_flt_import_data => dbl_flt_import_data.all_imports);
+  y3_domain[0] = y3_domain[0] - (0.1 * (y3_domain[1] - y3_domain[0]));
+  var y3 = d3.scaleLinear().range([height, 0]).domain(y3_domain).nice();
 
   // price line
   var priceline = d3.line()
@@ -83,7 +96,7 @@ async function init() {
 
   // production line
   var productionline = d3.line()
-      .defined(function(d) { return d.production> 0; })
+      .defined(function(d) { return d.production > 0; })
       .x(function(d) { return x(d.date); })
       .y(function(d) { return y1(d.production); });
 
@@ -92,6 +105,12 @@ async function init() {
       .defined(function(d) { return d.stockpile > 0; })
       .x(function(d) { return x(d.date); })
       .y(function(d) { return y2(d.stockpile); });
+
+  // import line
+  var importline = d3.line()
+      .defined(function(d) { return d.all_imports > 0; })
+      .x(function(d) { return x(d.date); })
+      .y(function(d) { return y3(d.all_imports); });
 
   var svg = d3.select("svg")
       .attr("width", width + margin.left + margin.right)
@@ -119,6 +138,13 @@ async function init() {
       .attr("class", "stockline line drilldownline")
       .attr("id", "stockline")
       .attr("d", stockline);
+
+  // add the import path
+  svg.append("path")
+      .data([flt_import_data])
+      .attr("class", "importline line drilldownline")
+      .attr("id", "importline")
+      .attr("d", importline);
 
    //add priceline label
   first_price_data = data[6];
@@ -149,6 +175,16 @@ async function init() {
     .attr("y", y2(first_stock_data.stockpile + 1000))
     .style("opacity", "0")
     .text("Stockpiles at Export Country");
+
+  //add importline label
+  first_import_data = flt_import_data[6];
+  svg.append("text")
+    .attr("class", "importline importline_label label")
+    .attr("x", x(first_import_data.date))
+    .attr("y", y3(first_import_data.all_imports))
+    .attr("dy", "1em")
+    .style("opacity", "0")
+    .text("Green Coffee Imports");
 
   // add the x axis
   svg.append("g")
@@ -197,6 +233,21 @@ async function init() {
      .attr("dy", "0.71em")
      .text("1000 60kg Bags");
   d3.select(".stockline_axis").style("opacity", "0");
+
+  // add the y3 axis
+  svg.append("g")
+     .attr("class", "importline importline_axis right_axis")
+     .attr("transform", "translate( " + width + ", 0 )")
+     .call(d3.axisRight(y3));
+
+  svg.append("text")
+     .attr("class", "importline_axis axis_label right_axis")
+     .attr("transform", "rotate(-90)")
+     .attr("x", -100)
+     .attr("y", width - 15)
+     .attr("dy", "0.71em")
+     .text("1000 60kg Bags");
+  d3.select(".importline_axis").style("opacity", "0");
 
   const div = d3.select("body")
     .append("div")
@@ -265,14 +316,14 @@ async function init() {
     .attr("x", x(max_price.date))
     .attr("y", y0(max_price.composite_price))
     .attr("dx", "0.5em")
-    .attr("dy", "-1em")
+    .attr("dy", "-2em")
     .text("$2.31/lb - April, 2011 - Highest prices in over 30 years")
   svg.append("text")
     .attr("class", "annotation2 annotation")
     .attr("x", x(max_price.date.setDate(max_price.date.getDate())))
     .attr("y", y0(max_price.composite_price))
     .attr("dx", "1em")
-    .attr("dy", "0.4em")
+    .attr("dy", "-0.6em")
     .text("463% increase over September, 2001 prices")
   d3.selectAll(".annotation2 annotation").style("opacity", "0");
 
@@ -310,8 +361,6 @@ async function init() {
           .style("opacity", "0");
       }
     });
-  // left off above not checked yet.
-
 
   // stockline tooltips
   var stockline_tooltip = svg.selectAll(".stockline_tooltip")
@@ -347,6 +396,42 @@ async function init() {
           .style("opacity", "0");
       }
     });
+
+  // importline tooltips
+  var importline_tooltip = svg.selectAll(".importline_tooltip")
+    .data(flt_stock_data).enter().append("circle");
+  importline_tooltip
+      .attr("class", "importline_tooltip importline")
+      .attr("r", 5)
+      .attr("cx", function(d) { return x(d.date); })
+      .attr("cy", function(d) { return y3(d.all_imports); })
+      .style("fill", "#C38D9E")
+      .style("opacity", "0")
+      .on("mouseover", function(d) {
+      if (lines_drawn["importline"]) {
+        d3.select(this).transition().duration(no_time*50)
+          .style("opacity", "1")
+        div
+          .style("border-color", "#C38D9E")
+          .transition().duration(no_time*50)
+          .attr("class", "tooltip importlinetooltip")
+          .style("opacity", "1");
+        div.html(year_time_format(d.date) 
+                 + "<br/>"
+                 + Math.round(d.all_imports,0).toLocaleString() + " K Bags")
+        .style("left", (d3.event.pageX) + "px")
+        .style("top", (d3.event.pageY - 50) + "px");
+      }
+    })
+    .on("mouseout", function() {
+      if (lines_drawn["importline"]) {
+        d3.select(this).transition().duration(no_time*10)
+          .style("opacity", "0");
+        div.transition().duration(no_time*10)
+          .style("opacity", "0");
+      }
+    });
+
 
   d3.selectAll(".drilldownline")
     .on("mouseover", function() {
@@ -461,8 +546,38 @@ function animatelines() {
         .transition("drawStockLine")
         .duration(no_time*500)
         .style("opacity", "1");
-      state = 2;
+      state = 3;
       lines_drawn.stockline = true;
+    } else if (state == 3) {
+      d3.selectAll(".slidetext")
+        .transition().duration(no_time*1000)
+        .style("opacity", "0")
+        .text(import_text)
+        .transition().delay(no_time*500).duration(no_time*1000)
+        .style("opacity", "1");
+      d3.selectAll(".stockline_axis")
+        .transition("fadeStockpileLine").duration(no_time*1000)
+        .style("opacity", "0");
+      d3.selectAll(".importline_axis,.importline_label").style("opacity", "0");
+      var totalLength = d3.select("#importline").node().getTotalLength();
+      d3.selectAll(".importline_label").transition("importlineLabel").duration(no_time*100)
+        .style("opacity", "1");
+      d3.select("#importline")
+        .style("opacity", "1").style("stroke-width", 6)
+        .attr("stroke-dasharray", totalLength + " " + totalLength)
+        .attr("stroke-dashoffset", totalLength)
+        .transition("drawImportLine")
+        .duration(no_time*3000)
+        .ease(d3.easeLinear)
+        .attr("stroke-dashoffset", 0);
+      d3.selectAll(".importline_axis")
+        .style("opacity", "0")
+        .transition("drawImportLine")
+        .duration(no_time*500)
+        .style("opacity", "1");
+      state = 4;
+      lines_drawn.importline = true;
+
     }
 
     d3.selectAll(".line").style("stroke-width", 3);
