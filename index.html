@@ -143,7 +143,8 @@ async function init() {
       .data([data])
       .attr("class", "priceline line")
       .attr("id", "priceline")
-      .attr("d", priceline);
+      .attr("d", priceline)
+      .style("stroke-width", "4px");
 
   // add the productionline path
   svg.append("path")
@@ -219,6 +220,7 @@ async function init() {
     .attr("class", "retailline retailline_label label")
     .attr("x", x(first_retail_data.date))
     .attr("y", y4(first_retail_data.USA_retail_price_USD))
+    .attr("dx", "0.5em")
     .attr("dy", "-5em")
     .style("opacity", "0")
     .text("US Average Retail Price");
@@ -524,13 +526,13 @@ async function init() {
       if (lines_drawn[this.id]) {
         d3.select(this).transition().duration(no_time*"50")
           .style("opacity", "1")
-          .style("stroke-width", "6"); }
+          .style("stroke-width", "6px"); }
     })
     .on("mouseout", function() {
       if (lines_drawn[this.id]) {
         d3.select(this).transition().duration(no_time*"10")
           .style("opacity", "0.6")
-          .style("stroke-width", "3"); }
+          .style("stroke-width", "2px"); }
     });
   d3.select(".stockline")
    .on("click", function() {
@@ -541,7 +543,7 @@ async function init() {
 }
 
 function animatelines() {
-  console.log("animatelines called with state: " + state);
+  d3.selectAll(".label").style("stroke-width", "2px");
     if(state === null) {
       d3.selectAll(".line,.label,.annotation,.right_axis")
         .style("opacity", "0");
@@ -559,7 +561,7 @@ function animatelines() {
         .ease(d3.easeCubic)
         .style("opacity", "1")
       d3.selectAll(".line,.right_axis").style("opacity", "0");
-      d3.select("#priceline").style("opacity", "1").style("stroke-width", 6);
+      d3.select("#priceline").style("opacity", "1").style("stroke-width", "6px");
       var totalLength = d3.select("#priceline").node().getTotalLength();
       d3.selectAll(".priceline_label").transition("pricelineLabel").duration(no_time*100)
         .style("opacity", "1");
@@ -591,7 +593,7 @@ function animatelines() {
       d3.selectAll(".productionline_label").transition("productionlineLabel").duration(no_time*100)
         .style("opacity", "1");
       d3.select("#productionline")
-        .style("opacity", "1").style("stroke-width", 6)
+        .style("opacity", "1").style("stroke-width", "6px")
         .attr("stroke-dasharray", totalLength + " " + totalLength)
         .attr("stroke-dashoffset", totalLength)
         .transition("drawProdLine")
@@ -615,12 +617,14 @@ function animatelines() {
       d3.selectAll(".productionline_axis")
         .transition("fadeProdLine").duration(no_time*1000)
         .style("opacity", "0");
+      d3.selectAll(".productionline,.productionline_label").transition().duration(500)
+        .style("stroke-width", "2px");
       d3.selectAll(".stockline_axis,.stockline_label").style("opacity", "0");
       var totalLength = d3.select("#stockline").node().getTotalLength();
       d3.selectAll(".stockline_label").transition("stocklineLabel").duration(no_time*100)
         .style("opacity", "1");
       d3.select("#stockline")
-        .style("opacity", "1").style("stroke-width", 6)
+        .style("opacity", "1").style("stroke-width", "6px")
         .attr("stroke-dasharray", totalLength + " " + totalLength)
         .attr("stroke-dashoffset", totalLength)
         .transition("drawStockLine")
@@ -644,12 +648,14 @@ function animatelines() {
       d3.selectAll(".stockline_axis")
         .transition("fadeStockpileLine").duration(no_time*1000)
         .style("opacity", "0");
+      d3.selectAll(".stockline,.stockline_label").transition("fadeStockpileLine").duration(no_time*500)
+        .style("stroke-width", "2px");
       d3.selectAll(".importline_axis,.importline_label").style("opacity", "0");
       var totalLength = d3.select("#importline").node().getTotalLength();
       d3.selectAll(".importline_label").transition("importlineLabel").duration(no_time*100)
         .style("opacity", "1");
       d3.select("#importline")
-        .style("opacity", "1").style("stroke-width", 6)
+        .style("opacity", "1").style("stroke-width", "6px")
         .attr("stroke-dasharray", totalLength + " " + totalLength)
         .attr("stroke-dashoffset", totalLength)
         .transition("drawImportLine")
@@ -673,12 +679,14 @@ function animatelines() {
       d3.selectAll(".importline_axis")
         .transition("fadeImportLine").duration(no_time*1000)
         .style("opacity", "0");
+      d3.selectAll(".importline").transition().duration(500)
+        .style("stroke-width", "2px");
       d3.selectAll(".retailline_axis,.retailline_label").style("opacity", "0");
       var totalLength = d3.select("#retailline").node().getTotalLength();
       d3.selectAll(".retailline_label").transition("retaillineLabel").duration(no_time*100)
         .style("opacity", "1");
       d3.select("#retailline")
-        .style("opacity", "1").style("stroke-width", 6)
+        .style("opacity", "1").style("stroke-width", "6px")
         .attr("stroke-dasharray", totalLength + " " + totalLength)
         .attr("stroke-dashoffset", totalLength)
         .transition("drawRetailLine")
@@ -693,9 +701,7 @@ function animatelines() {
       state = 5;
       lines_drawn.retailline = true;
     }
-
-
-    d3.selectAll(".line").style("stroke-width", 3);
+    d3.selectAll(".label").style("stroke-width", "2px");
 }
 
 function reset() { 
